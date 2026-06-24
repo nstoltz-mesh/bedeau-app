@@ -84,6 +84,8 @@ export default function App() {
     } catch { return 0; }
   });
   const [flashFlipping, setFlashFlipping] = useState(false);
+  const [flashVinsOverride, setFlashVinsOverride] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const touchStartX = useRef(null);
 
   useEffect(() => {
@@ -124,7 +126,7 @@ export default function App() {
     return VINS.filter(v => selectedCats.includes(v.c));
   }, [selectedCats]);
 
-  const flashVins = useMemo(() => shuffle(filteredVins), [filteredVins, mode]);
+  const flashVins = useMemo(() => flashVinsOverride ?? shuffle(filteredVins), [filteredVins, mode, flashVinsOverride]);
 
   const weakVins = useMemo(() => {
     return filteredVins
@@ -154,6 +156,7 @@ export default function App() {
     setWeakMode(isWeak);
     setFlashIdx(0);
     setFlashFlipped(false);
+    setFlashVinsOverride(null);
     setScore(0);
     setStreak(0);
     setChosen(null);
@@ -168,6 +171,17 @@ export default function App() {
       const q = genQuestion(pool[0], filteredVins);
       setQuizQ(q);
     }
+    setScreen("play");
+  };
+
+  const startFlashAtWine = (vin) => {
+    const rest = VINS.filter(v => v.id !== vin.id);
+    setFlashVinsOverride([vin, ...rest]);
+    setFlashIdx(0);
+    setFlashFlipped(false);
+    setFlashFlipping(false);
+    setMode("flash");
+    setSearchQuery("");
     setScreen("play");
   };
 
@@ -235,18 +249,24 @@ export default function App() {
   if (screen === "home") return (
     <div style={{ ...s, background: "linear-gradient(170deg, #1E0814 0%, #0A040A 32%)" }}>
       <div style={{ padding: "max(32px, env(safe-area-inset-top, 24px)) 20px 16px", borderBottom: "1px solid #2A1A2280", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
+        <div style={{ flex: 1 }}>
           <div style={{ fontSize: 11, letterSpacing: 3, color: "#8A7060", textTransform: "uppercase", marginBottom: 6 }}>Bedeau · Formation</div>
           <div style={{ fontSize: 28, fontWeight: 700, color: "#F0E8E0", lineHeight: 1.15, letterSpacing: -0.5 }}>Carte des vins</div>
           <div style={{ fontSize: 13, color: "#7A6B60", marginTop: 4 }}>{VINS.length} vins · fiches techniques</div>
         </div>
-        {dailyStreak > 0 && (
-          <div style={{ textAlign: "center", background: "linear-gradient(145deg, #2A1808, #1A0E04)", border: "1px solid #C9A84C50", borderRadius: 16, padding: "12px 16px", flexShrink: 0, minWidth: 64, boxShadow: "0 0 20px #C9A84C25, 0 4px 12px #00000060", animation: "streakPulse 2.5s ease-in-out infinite" }}>
-            <div style={{ fontSize: 24 }}>🔥</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: "#C9A84C", lineHeight: 1 }}>{dailyStreak}</div>
-            <div style={{ fontSize: 11, color: "#7A6B60", marginTop: 2 }}>{dailyStreak > 1 ? "jours" : "jour"}</div>
-          </div>
-        )}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8, flexShrink: 0 }}>
+          <button onClick={() => { setSearchQuery(""); setScreen("search"); }}
+            style={{ background: "linear-gradient(145deg, #1E1018, #160C14)", border: "1px solid #3A2A3060", borderRadius: 12, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 20, boxShadow: "0 2px 10px #00000040" }}>
+            🔍
+          </button>
+          {dailyStreak > 0 && (
+            <div style={{ textAlign: "center", background: "linear-gradient(145deg, #2A1808, #1A0E04)", border: "1px solid #C9A84C50", borderRadius: 16, padding: "10px 14px", minWidth: 60, boxShadow: "0 0 20px #C9A84C25, 0 4px 12px #00000060", animation: "streakPulse 2.5s ease-in-out infinite" }}>
+              <div style={{ fontSize: 22 }}>🔥</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: "#C9A84C", lineHeight: 1 }}>{dailyStreak}</div>
+              <div style={{ fontSize: 10, color: "#7A6B60", marginTop: 2 }}>{dailyStreak > 1 ? "jours" : "jour"}</div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div style={{ padding: "20px 20px 8px" }}>
@@ -535,6 +555,71 @@ export default function App() {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── RECHERCHE ───────────────────────────────────────────────────────────────
+  if (screen === "search") {
+    const q = searchQuery.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    const results = q.length === 0 ? VINS : VINS.filter(v => {
+      const hay = [v.nom, v.p, v.cp, v.c, v.pr].join(" ").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+      return q.split(" ").every(word => hay.includes(word));
+    });
+
+    return (
+      <div style={{ ...s, display: "flex", flexDirection: "column", background: "linear-gradient(170deg, #1E0814 0%, #0A040A 32%)" }}>
+        {/* En-tête */}
+        <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#0A040ABB", backdropFilter: "blur(12px)", borderBottom: "1px solid #2A1A2260", padding: "max(16px, env(safe-area-inset-top, 16px)) 16px 12px" }}>
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <button onClick={() => setScreen("home")}
+              style={{ background: "none", border: "none", color: "#8A7060", fontSize: 24, cursor: "pointer", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", padding: 0, flexShrink: 0 }}>
+              ←
+            </button>
+            <div style={{ flex: 1, position: "relative" }}>
+              <input
+                autoFocus
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Nom, cépage, pays, profil…"
+                inputMode="search"
+                style={{ width: "100%", background: "linear-gradient(145deg, #1E1018, #160C14)", border: "1px solid #3A2A3080", borderRadius: 12, padding: "12px 40px 12px 16px", fontSize: 15, color: "#F0E8E0", outline: "none", fontFamily: "inherit", boxSizing: "border-box", boxShadow: "0 2px 10px #00000040, inset 0 1px 0 #FFFFFF06" }}
+              />
+              {searchQuery.length > 0 && (
+                <button onClick={() => setSearchQuery("")}
+                  style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#6A5A60", fontSize: 18, cursor: "pointer", padding: 4, lineHeight: 1 }}>
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+          <div style={{ marginTop: 8, marginLeft: 54, fontSize: 12, color: "#5A4A50" }}>
+            {q.length === 0 ? `${VINS.length} vins dans le catalogue` : `${results.length} résultat${results.length !== 1 ? "s" : ""}`}
+          </div>
+        </div>
+
+        {/* Résultats */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "8px 16px", paddingBottom: "max(24px, env(safe-area-inset-bottom, 24px))" }}>
+          {results.map((v, i) => {
+            const cfg = CAT_CONFIG[v.c] || { color: "#C9A84C", emoji: "🍷" };
+            return (
+              <button key={v.id} onClick={() => startFlashAtWine(v)}
+                style={{ width: "100%", background: "linear-gradient(145deg, #1A0E16, #120A10)", border: `1px solid ${cfg.color}20`, borderRadius: 14, padding: "14px 16px", marginBottom: 8, textAlign: "left", cursor: "pointer", display: "block", boxShadow: "0 2px 10px #00000040, inset 0 1px 0 #FFFFFF05", animation: `fadeUp ${120 + i * 20}ms ease-out` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: "#F0E8E0", lineHeight: 1.3, flex: 1, letterSpacing: -0.2 }}>{v.nom}</div>
+                  <div style={{ fontSize: 12, color: cfg.color, marginLeft: 10, flexShrink: 0, marginTop: 1 }}>{cfg.emoji} {cfg.short}</div>
+                </div>
+                <div style={{ fontSize: 12, color: "#8A7060" }}>{v.p} · {v.cp}</div>
+              </button>
+            );
+          })}
+          {results.length === 0 && (
+            <div style={{ textAlign: "center", padding: "60px 20px", color: "#4A3A40" }}>
+              <div style={{ fontSize: 36, marginBottom: 12 }}>🔍</div>
+              <div style={{ fontSize: 14 }}>Aucun vin trouvé</div>
             </div>
           )}
         </div>
