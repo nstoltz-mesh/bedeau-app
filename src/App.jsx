@@ -83,6 +83,7 @@ export default function App() {
       return 0;
     } catch { return 0; }
   });
+  const [flashFlipping, setFlashFlipping] = useState(false);
   const touchStartX = useRef(null);
 
   useEffect(() => {
@@ -92,8 +93,14 @@ export default function App() {
     style.textContent = [
       '*,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}',
       'html,body{height:100%;overflow-x:hidden;overscroll-behavior-y:none;-webkit-text-size-adjust:100%}',
-      'button{touch-action:manipulation;font-family:inherit;-webkit-appearance:none}',
+      'button{touch-action:manipulation;font-family:inherit;-webkit-appearance:none;transition:transform 80ms ease,box-shadow 120ms ease,opacity 80ms ease}',
+      'button:active{transform:scale(0.96)!important;opacity:.85}',
       '#root{min-height:100dvh}',
+      '@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}',
+      '@keyframes fadeIn{from{opacity:0}to{opacity:1}}',
+      '@keyframes streakPulse{0%,100%{box-shadow:0 0 0 0 #C9A84C50}60%{box-shadow:0 0 0 10px #C9A84C00}}',
+      '@keyframes correctGlow{0%{box-shadow:0 0 0 0 #4CAF7860}100%{box-shadow:0 0 14px 0 #4CAF7800}}',
+      '@keyframes wrongShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}',
     ].join('');
     document.head.appendChild(style);
   }, []);
@@ -164,8 +171,13 @@ export default function App() {
     setScreen("play");
   };
 
-  const nextFlash = () => { setFlashIdx(i => (i + 1) % flashVins.length); setFlashFlipped(false); };
-  const prevFlash = () => { setFlashIdx(i => (i - 1 + flashVins.length) % flashVins.length); setFlashFlipped(false); };
+  const animateFlip = (action) => {
+    if (flashFlipping) return;
+    setFlashFlipping(true);
+    setTimeout(() => { action(); setFlashFlipping(false); }, 160);
+  };
+  const nextFlash = () => animateFlip(() => { setFlashIdx(i => (i + 1) % flashVins.length); setFlashFlipped(false); });
+  const prevFlash = () => animateFlip(() => { setFlashIdx(i => (i - 1 + flashVins.length) % flashVins.length); setFlashFlipped(false); });
 
   const handleAnswer = (opt) => {
     if (chosen) return;
@@ -221,15 +233,15 @@ export default function App() {
   // ─── SCREENS ────────────────────────────────────────────────────────────────
 
   if (screen === "home") return (
-    <div style={s}>
-      <div style={{ padding: "max(32px, env(safe-area-inset-top, 24px)) 20px 16px", borderBottom: "1px solid #2A1A22", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+    <div style={{ ...s, background: "linear-gradient(170deg, #1E0814 0%, #0A040A 32%)" }}>
+      <div style={{ padding: "max(32px, env(safe-area-inset-top, 24px)) 20px 16px", borderBottom: "1px solid #2A1A2280", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
           <div style={{ fontSize: 11, letterSpacing: 3, color: "#8A7060", textTransform: "uppercase", marginBottom: 6 }}>Bedeau · Formation</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: "#F0E8E0", lineHeight: 1.15 }}>Carte des vins</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: "#F0E8E0", lineHeight: 1.15, letterSpacing: -0.5 }}>Carte des vins</div>
           <div style={{ fontSize: 13, color: "#7A6B60", marginTop: 4 }}>{VINS.length} vins · fiches techniques</div>
         </div>
         {dailyStreak > 0 && (
-          <div style={{ textAlign: "center", background: "#1E1008", border: "1px solid #C9A84C40", borderRadius: 14, padding: "12px 16px", flexShrink: 0, minWidth: 64 }}>
+          <div style={{ textAlign: "center", background: "linear-gradient(145deg, #2A1808, #1A0E04)", border: "1px solid #C9A84C50", borderRadius: 16, padding: "12px 16px", flexShrink: 0, minWidth: 64, boxShadow: "0 0 20px #C9A84C25, 0 4px 12px #00000060", animation: "streakPulse 2.5s ease-in-out infinite" }}>
             <div style={{ fontSize: 24 }}>🔥</div>
             <div style={{ fontSize: 20, fontWeight: 700, color: "#C9A84C", lineHeight: 1 }}>{dailyStreak}</div>
             <div style={{ fontSize: 11, color: "#7A6B60", marginTop: 2 }}>{dailyStreak > 1 ? "jours" : "jour"}</div>
@@ -245,7 +257,7 @@ export default function App() {
             const active = selectedCats.includes(c);
             return (
               <button key={c} onClick={() => toggleCat(c)}
-                style={{ background: active ? cfg.color : "#1E1018", color: active ? "#0A040A" : cfg.color, border: `1px solid ${cfg.color}40`, borderRadius: 20, padding: "9px 16px", fontSize: 13, fontWeight: active ? 700 : 400, cursor: "pointer", transition: "all .15s", minHeight: 44 }}>
+                style={{ background: active ? cfg.color : "#1A0E16", color: active ? "#0A040A" : cfg.color, border: `1px solid ${cfg.color}${active ? "FF" : "40"}`, borderRadius: 20, padding: "9px 16px", fontSize: 13, fontWeight: active ? 700 : 400, cursor: "pointer", minHeight: 44, boxShadow: active ? `0 0 14px ${cfg.color}50, 0 2px 8px #00000040` : "0 1px 4px #00000030" }}>
                 {cfg.emoji} {cfg.short} <span style={{ opacity: .7 }}>({vinsBycat[c].length})</span>
               </button>
             );
@@ -270,7 +282,7 @@ export default function App() {
             const disabled = n && n > activeVins.length;
             return (
               <button key={String(n)} onClick={() => !disabled && setSessionLength(n)}
-                style={{ flex: 1, padding: "13px 0", background: active ? "#C9A84C" : "#1E1018", border: `1px solid ${active ? "#C9A84C" : "#2A1A22"}`, borderRadius: 10, color: active ? "#0A040A" : disabled ? "#3A3030" : "#D0C8C0", fontSize: 14, fontWeight: active ? 700 : 400, cursor: disabled ? "default" : "pointer", minHeight: 48 }}>
+                style={{ flex: 1, padding: "13px 0", background: active ? "#C9A84C" : "#1A0E16", border: `1px solid ${active ? "#C9A84C" : "#2A1A22"}`, borderRadius: 10, color: active ? "#0A040A" : disabled ? "#3A3030" : "#D0C8C0", fontSize: 14, fontWeight: active ? 700 : 400, cursor: disabled ? "default" : "pointer", minHeight: 48, boxShadow: active ? "0 2px 12px #C9A84C40" : "0 1px 4px #00000030" }}>
                 {label}
               </button>
             );
@@ -283,27 +295,27 @@ export default function App() {
         <div style={{ fontSize: 11, letterSpacing: 2, color: "#8A7060", textTransform: "uppercase", marginTop: 4, marginBottom: 4 }}>Choisir un mode</div>
 
         <button onClick={() => startMode("flash")}
-          style={{ background: "#1E1018", border: "1px solid #3A2030", borderRadius: 12, padding: "18px 20px", textAlign: "left", cursor: "pointer", color: "#F0E8E0" }}>
-          <div style={{ fontSize: 20, marginBottom: 4 }}>📋 Fiches Flash</div>
-          <div style={{ fontSize: 13, color: "#8A7060" }}>Révise les vins un à un — nom, cépages, profil, phrase de service</div>
+          style={{ background: "linear-gradient(145deg, #201218, #160C14)", border: "1px solid #3A2030", borderRadius: 14, padding: "18px 20px", textAlign: "left", cursor: "pointer", color: "#F0E8E0", boxShadow: "0 2px 16px #00000050, inset 0 1px 0 #FFFFFF08" }}>
+          <div style={{ fontSize: 20, marginBottom: 6 }}>📋 Fiches Flash</div>
+          <div style={{ fontSize: 13, color: "#8A7060", lineHeight: 1.5 }}>Révise les vins un à un — nom, cépages, profil, phrase de service</div>
         </button>
 
         <button onClick={() => startMode("quiz")}
-          style={{ background: "#1E1018", border: "1px solid #3A2030", borderRadius: 12, padding: "18px 20px", textAlign: "left", cursor: "pointer", color: "#F0E8E0" }}>
-          <div style={{ fontSize: 20, marginBottom: 4 }}>🎯 Quiz Sommelier</div>
-          <div style={{ fontSize: 13, color: "#8A7060" }}>QCM sur les cépages, profils et origines — {activeVins.length} questions</div>
+          style={{ background: "linear-gradient(145deg, #201218, #160C14)", border: "1px solid #3A2030", borderRadius: 14, padding: "18px 20px", textAlign: "left", cursor: "pointer", color: "#F0E8E0", boxShadow: "0 2px 16px #00000050, inset 0 1px 0 #FFFFFF08" }}>
+          <div style={{ fontSize: 20, marginBottom: 6 }}>🎯 Quiz Sommelier</div>
+          <div style={{ fontSize: 13, color: "#8A7060", lineHeight: 1.5 }}>QCM sur les cépages, profils et origines — {activeVins.length} questions</div>
         </button>
 
         {weakVins.length > 0 && (
           <button onClick={() => startMode("weak")}
-            style={{ background: "#1E0A0A", border: "1px solid #C44858", borderRadius: 12, padding: "18px 20px", textAlign: "left", cursor: "pointer", color: "#F0E8E0" }}>
-            <div style={{ fontSize: 20, marginBottom: 4 }}>📍 Points faibles <span style={{ fontSize: 14, color: "#C44858" }}>({weakVins.length})</span></div>
-            <div style={{ fontSize: 13, color: "#8A7060" }}>Révise uniquement les vins que tu as ratés — triés par taux d'erreur</div>
+            style={{ background: "linear-gradient(145deg, #220A0A, #160606)", border: "1px solid #C44858", borderRadius: 14, padding: "18px 20px", textAlign: "left", cursor: "pointer", color: "#F0E8E0", boxShadow: "0 2px 16px #C4485820, inset 0 1px 0 #FFFFFF08" }}>
+            <div style={{ fontSize: 20, marginBottom: 6 }}>📍 Points faibles <span style={{ fontSize: 14, color: "#C44858" }}>({weakVins.length})</span></div>
+            <div style={{ fontSize: 13, color: "#8A7060", lineHeight: 1.5 }}>Révise uniquement les vins que tu as ratés — triés par taux d'erreur</div>
           </button>
         )}
 
         {totalAnswered > 0 && (
-          <div style={{ background: "#140A10", border: "1px solid #2A1A22", borderRadius: 12, padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ background: "linear-gradient(145deg, #160A12, #100810)", border: "1px solid #2A1A2260", borderRadius: 12, padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "inset 0 1px 0 #FFFFFF06" }}>
             <div style={{ fontSize: 12, color: "#7A6B60" }}>Progression globale</div>
             <div style={{ display: "flex", gap: 16, fontSize: 13 }}>
               <span style={{ color: "#4CAF78" }}>✓ {masteredCount} maîtrisés</span>
@@ -320,56 +332,56 @@ export default function App() {
     const vin = flashVins[flashIdx];
     const cfg = CAT_CONFIG[vin.c] || { color: "#C9A84C", bg: "#1A1208" };
     return (
-      <div style={{ ...s, display: "flex", flexDirection: "column" }}>
+      <div style={{ ...s, display: "flex", flexDirection: "column", background: `linear-gradient(170deg, ${cfg.bg || "#140A10"} 0%, #0A040A 30%)` }}>
         {/* En-tête sticky */}
-        <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#0A040A", borderBottom: "1px solid #2A1A22" }}>
+        <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#0A040ABB", backdropFilter: "blur(12px)", borderBottom: "1px solid #2A1A2260" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px" }}>
             <button onClick={() => setScreen("home")} style={{ background: "none", border: "none", color: "#8A7060", fontSize: 26, cursor: "pointer", padding: "4px 8px 4px 0", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center" }}>←</button>
             <div style={{ fontSize: 13, color: "#7A6B60" }}>{flashIdx + 1} / {flashVins.length}</div>
             <div style={{ fontSize: 13, color: cfg.color, minWidth: 60, textAlign: "right" }}>{CAT_CONFIG[vin.c]?.emoji} {CAT_CONFIG[vin.c]?.short}</div>
           </div>
           <div style={{ height: 3, background: "#2A1A22" }}>
-            <div style={{ height: "100%", width: `${((flashIdx + 1) / flashVins.length) * 100}%`, background: cfg.color, transition: "width .3s" }} />
+            <div style={{ height: "100%", width: `${((flashIdx + 1) / flashVins.length) * 100}%`, background: `linear-gradient(90deg, ${cfg.color}AA, ${cfg.color})`, transition: "width .4s cubic-bezier(.4,0,.2,1)", borderRadius: "0 2px 2px 0" }} />
           </div>
         </div>
 
         {/* Carte — zone swipeable plein écran */}
         <div style={{ flex: 1, padding: "12px 16px 0", display: "flex", flexDirection: "column" }}>
           <div
-            onClick={() => setFlashFlipped(f => !f)}
+            onClick={() => animateFlip(() => setFlashFlipped(f => !f))}
             onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
             onTouchEnd={(e) => {
               if (touchStartX.current === null) return;
               const delta = e.changedTouches[0].clientX - touchStartX.current;
               if (Math.abs(delta) > 50) { delta < 0 ? nextFlash() : prevFlash(); }
-              else { setFlashFlipped(f => !f); }
+              else { animateFlip(() => setFlashFlipped(f => !f)); }
               touchStartX.current = null;
             }}
-            style={{ flex: 1, background: "#140A10", border: `1px solid ${cfg.color}30`, borderRadius: 20, padding: "24px 20px 56px", cursor: "pointer", marginBottom: 12, position: "relative", userSelect: "none", minHeight: 320 }}>
+            style={{ flex: 1, background: "linear-gradient(160deg, #1E1018, #120810)", border: `1px solid ${cfg.color}35`, borderRadius: 22, padding: "24px 20px 56px", cursor: "pointer", marginBottom: 12, position: "relative", userSelect: "none", minHeight: 320, boxShadow: `0 8px 32px #00000060, 0 0 0 1px ${cfg.color}10, inset 0 1px 0 #FFFFFF08`, opacity: flashFlipping ? 0 : 1, transform: flashFlipping ? "scale(0.97)" : "scale(1)", transition: "opacity 160ms ease, transform 160ms ease" }}>
 
             {!flashFlipped ? (
               <>
                 <div style={{ fontSize: 11, letterSpacing: 2, color: cfg.color, textTransform: "uppercase", marginBottom: 14 }}>
                   {vin.p} · {CAT_CONFIG[vin.c]?.short}
                 </div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: "#F0E8E0", lineHeight: 1.25, marginBottom: 10 }}>{vin.nom}</div>
-                <div style={{ fontSize: 14, color: "#A09080", marginBottom: 18, lineHeight: 1.6 }}>{vin.n}</div>
-                {vin.ca ? <div style={{ background: "#2A1408", border: "1px solid #8B4513", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#D4823A", marginBottom: 8 }}>📦 À carafer avant service</div> : null}
-                {vin.al ? <div style={{ background: "#201018", border: "1px solid #8B2030", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#C44858" }}>⚠️ Attention — voir alertes</div> : null}
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 20px", borderTop: "1px solid #2A1A22", fontSize: 12, color: "#4A3A40" }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: "#F0E8E0", lineHeight: 1.25, marginBottom: 10, letterSpacing: -0.3 }}>{vin.nom}</div>
+                <div style={{ fontSize: 14, color: "#8A7870", marginBottom: 18, lineHeight: 1.6 }}>{vin.n}</div>
+                {vin.ca ? <div style={{ background: "#2A140820", border: "1px solid #8B451340", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#D4823A", marginBottom: 8 }}>📦 À carafer avant service</div> : null}
+                {vin.al ? <div style={{ background: "#20101820", border: "1px solid #8B203040", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#C44858" }}>⚠️ Attention — voir alertes</div> : null}
+                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 20px", borderTop: `1px solid ${cfg.color}15`, fontSize: 12, color: "#3A2A30" }}>
                   <span>← swipe</span>
-                  <span style={{ color: cfg.color + "90" }}>Toucher · retourner</span>
+                  <span style={{ color: cfg.color + "70" }}>Toucher · retourner</span>
                   <span>swipe →</span>
                 </div>
               </>
             ) : (
               <>
                 <div style={{ fontSize: 11, letterSpacing: 2, color: cfg.color, textTransform: "uppercase", marginBottom: 14 }}>Fiche technique</div>
-                <div style={{ fontSize: 12, color: "#8A7060", marginBottom: 4, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Cépages</div>
-                <div style={{ fontSize: 15, color: "#D0C8C0", marginBottom: 16, lineHeight: 1.5 }}>{vin.cp}</div>
-                <div style={{ fontSize: 12, color: "#8A7060", marginBottom: 4, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Profil</div>
-                <div style={{ fontSize: 15, color: "#D0C8C0", marginBottom: 16, lineHeight: 1.5 }}>{vin.pr}</div>
-                <div style={{ fontSize: 12, color: "#8A7060", marginBottom: 6, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>À dire au client</div>
+                <div style={{ fontSize: 11, color: "#6A5A60", marginBottom: 4, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase" }}>Cépages</div>
+                <div style={{ fontSize: 15, color: "#D0C8C0", marginBottom: 16, lineHeight: 1.55 }}>{vin.cp}</div>
+                <div style={{ fontSize: 11, color: "#6A5A60", marginBottom: 4, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase" }}>Profil</div>
+                <div style={{ fontSize: 15, color: "#D0C8C0", marginBottom: 16, lineHeight: 1.55 }}>{vin.pr}</div>
+                <div style={{ fontSize: 11, color: "#6A5A60", marginBottom: 6, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase" }}>À dire au client</div>
                 <div style={{ fontSize: 15, color: cfg.color, lineHeight: 1.65, fontStyle: "italic" }}>{vin.ps}</div>
               </>
             )}
@@ -377,12 +389,12 @@ export default function App() {
 
           {/* Navigation */}
           <div style={{ display: "flex", gap: 10, paddingBottom: "max(20px, env(safe-area-inset-bottom, 20px))" }}>
-            <button onClick={prevFlash} style={{ flex: 1, padding: "18px 0", background: "#1E1018", border: "1px solid #2A1A22", borderRadius: 14, color: "#A09080", fontSize: 22, cursor: "pointer", minHeight: 56 }}>←</button>
-            <button onClick={() => setFlashFlipped(f => !f)}
-              style={{ flex: 2, padding: "18px 0", background: flashFlipped ? cfg.color : "#1E1018", border: `1px solid ${cfg.color}40`, borderRadius: 14, color: flashFlipped ? "#0A040A" : cfg.color, fontSize: 14, fontWeight: 700, cursor: "pointer", minHeight: 56 }}>
+            <button onClick={prevFlash} style={{ flex: 1, padding: "18px 0", background: "linear-gradient(145deg, #1A1018, #120A10)", border: "1px solid #2A1A2260", borderRadius: 14, color: "#A09080", fontSize: 22, cursor: "pointer", minHeight: 56, boxShadow: "0 2px 12px #00000040, inset 0 1px 0 #FFFFFF06" }}>←</button>
+            <button onClick={() => animateFlip(() => setFlashFlipped(f => !f))}
+              style={{ flex: 2, padding: "18px 0", background: flashFlipped ? cfg.color : "linear-gradient(145deg, #1A1018, #120A10)", border: `1px solid ${cfg.color}${flashFlipped ? "FF" : "40"}`, borderRadius: 14, color: flashFlipped ? "#0A040A" : cfg.color, fontSize: 14, fontWeight: 700, cursor: "pointer", minHeight: 56, boxShadow: flashFlipped ? `0 4px 16px ${cfg.color}50` : "0 2px 12px #00000040, inset 0 1px 0 #FFFFFF06" }}>
               {flashFlipped ? "Voir recto" : "Voir la fiche"}
             </button>
-            <button onClick={nextFlash} style={{ flex: 1, padding: "18px 0", background: "#1E1018", border: "1px solid #2A1A22", borderRadius: 14, color: "#A09080", fontSize: 22, cursor: "pointer", minHeight: 56 }}>→</button>
+            <button onClick={nextFlash} style={{ flex: 1, padding: "18px 0", background: "linear-gradient(145deg, #1A1018, #120A10)", border: "1px solid #2A1A2260", borderRadius: 14, color: "#A09080", fontSize: 22, cursor: "pointer", minHeight: 56, boxShadow: "0 2px 12px #00000040, inset 0 1px 0 #FFFFFF06" }}>→</button>
           </div>
         </div>
       </div>
@@ -397,19 +409,19 @@ export default function App() {
     const types = { profil: "Identifie le vin", cepage: "Identifie les cépages", pays: "Identifie le pays" };
 
     return (
-      <div style={{ ...s, display: "flex", flexDirection: "column" }}>
+      <div style={{ ...s, display: "flex", flexDirection: "column", background: "linear-gradient(170deg, #14080E 0%, #0A040A 28%)" }}>
         {/* En-tête sticky */}
-        <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#0A040A", borderBottom: "1px solid #2A1A22" }}>
+        <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#0A040ABB", backdropFilter: "blur(12px)", borderBottom: "1px solid #2A1A2260" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px" }}>
             <button onClick={() => setScreen("home")} style={{ background: "none", border: "none", color: "#8A7060", fontSize: 24, cursor: "pointer", padding: "4px 8px 4px 0", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center" }}>✕</button>
             <div style={{ display: "flex", gap: 16, fontSize: 14 }}>
-              <span style={{ color: "#4CAF78", fontWeight: 600 }}>✓ {score}</span>
-              {streak >= 2 && <span style={{ color: "#C9A84C" }}>🔥 {streak}</span>}
+              <span style={{ color: "#4CAF78", fontWeight: 700 }}>✓ {score}</span>
+              {streak >= 2 && <span style={{ color: "#C9A84C", fontWeight: 700 }}>🔥 {streak}</span>}
             </div>
             <div style={{ fontSize: 13, color: "#7A6B60" }}>{answered + 1} / {total}</div>
           </div>
-          <div style={{ height: 4, background: "#2A1A22" }}>
-            <div style={{ height: "100%", width: `${(answered / total) * 100}%`, background: "#4CAF78", transition: "width .4s" }} />
+          <div style={{ height: 4, background: "#1A0E18" }}>
+            <div style={{ height: "100%", width: `${(answered / total) * 100}%`, background: "linear-gradient(90deg, #2E7D52, #4CAF78)", transition: "width .5s cubic-bezier(.4,0,.2,1)", borderRadius: "0 2px 2px 0" }} />
           </div>
         </div>
 
@@ -418,31 +430,33 @@ export default function App() {
           <div style={{ fontSize: 11, letterSpacing: 2, color: weakMode ? "#C44858" : cfg.color, textTransform: "uppercase", marginBottom: 12 }}>
             {weakMode ? "📍 Points faibles · " : `${cfg.emoji} ${CAT_CONFIG[quizQ.vin.c]?.short} · `}{types[quizQ.type] || "Quiz"}
           </div>
-          <div style={{ fontSize: 17, color: "#F0E8E0", lineHeight: 1.65, whiteSpace: "pre-line" }}>{quizQ.question}</div>
+          <div style={{ fontSize: 17, color: "#F0E8E0", lineHeight: 1.65, whiteSpace: "pre-line", letterSpacing: -0.1 }}>{quizQ.question}</div>
         </div>
 
         {/* Options */}
         <div style={{ padding: "8px 20px", paddingBottom: "max(24px, env(safe-area-inset-bottom, 24px))", display: "flex", flexDirection: "column", gap: 10, flex: 1 }}>
           {quizQ.options.map(opt => {
-            let bg = "#1E1018";
-            let border = "1px solid #2A1A22";
+            const isCorrect = chosen && opt === quizQ.reponse;
+            const isWrong = chosen && opt === chosen && !isCorrect;
+            const isDimmed = chosen && opt !== quizQ.reponse && opt !== chosen;
+            let bg = "linear-gradient(145deg, #1E1018, #160C14)";
+            let border = "1px solid #2A1A2260";
             let color = "#D0C8C0";
-            if (chosen) {
-              if (opt === quizQ.reponse) { bg = "#0A2010"; border = "1px solid #4CAF78"; color = "#4CAF78"; }
-              else if (opt === chosen) { bg = "#200A10"; border = "1px solid #C44858"; color = "#C44858"; }
-              else { color = "#4A3A40"; }
-            }
+            let shadow = "0 2px 10px #00000040, inset 0 1px 0 #FFFFFF06";
+            if (isCorrect) { bg = "linear-gradient(145deg, #0A2818, #082010)"; border = "1px solid #4CAF78"; color = "#4CAF78"; shadow = "0 0 20px #4CAF7830, 0 2px 10px #00000040"; }
+            else if (isWrong) { bg = "linear-gradient(145deg, #280A10, #200810)"; border = "1px solid #C44858"; color = "#C44858"; shadow = "0 0 12px #C4485820"; }
+            else if (isDimmed) { color = "#3A2A30"; shadow = "none"; border = "1px solid #1A1018"; }
             return (
               <button key={opt} onClick={() => handleAnswer(opt)}
-                style={{ background: bg, border, borderRadius: 14, padding: "16px 18px", textAlign: "left", cursor: chosen ? "default" : "pointer", color, fontSize: 15, lineHeight: 1.45, transition: "all .2s", minHeight: 54 }}>
+                style={{ background: bg, border, borderRadius: 14, padding: "16px 18px", textAlign: "left", cursor: chosen ? "default" : "pointer", color, fontSize: 15, lineHeight: 1.45, transition: "background 250ms ease, border 250ms ease, box-shadow 250ms ease, color 250ms ease", minHeight: 54, boxShadow: shadow }}>
                 {opt}
               </button>
             );
           })}
 
           {chosen && lastCorrect !== null && (
-            <div style={{ marginTop: 4 }}>
-              <div style={{ background: lastCorrect ? "#0A2010" : "#200A10", border: `1px solid ${lastCorrect ? "#4CAF78" : "#C44858"}`, borderRadius: 12, padding: "14px 16px", fontSize: 14, color: lastCorrect ? "#4CAF78" : "#C44858", fontWeight: 600 }}>
+            <div style={{ marginTop: 4, animation: "fadeUp 200ms ease-out" }}>
+              <div style={{ background: lastCorrect ? "linear-gradient(145deg, #0C2814, #0A2010)" : "linear-gradient(145deg, #280C10, #200810)", border: `1px solid ${lastCorrect ? "#4CAF78" : "#C44858"}`, borderRadius: 12, padding: "14px 16px", fontSize: 14, color: lastCorrect ? "#4CAF78" : "#C44858", fontWeight: 600, boxShadow: lastCorrect ? "0 0 20px #4CAF7825" : "0 0 16px #C4485820" }}>
                 {lastCorrect ? (streak >= 3 ? `🔥 ${streak} en série !` : "✓ Bonne réponse !") : `✗ Réponse : ${quizQ.reponse}`}
               </div>
               {!lastCorrect && quizQ.vin.ps && (
@@ -452,7 +466,7 @@ export default function App() {
               )}
               {!lastCorrect && (
                 <button onClick={advanceQuiz}
-                  style={{ marginTop: 14, width: "100%", padding: "16px", background: "#C9A84C", border: "none", borderRadius: 14, color: "#0A040A", fontSize: 15, fontWeight: 700, cursor: "pointer", minHeight: 52 }}>
+                  style={{ marginTop: 12, width: "100%", padding: "16px", background: "linear-gradient(145deg, #D4A84C, #C9A84C)", border: "none", borderRadius: 14, color: "#0A040A", fontSize: 15, fontWeight: 700, cursor: "pointer", minHeight: 52, boxShadow: "0 4px 16px #C9A84C40, inset 0 1px 0 #FFFFFF30" }}>
                   Question suivante →
                 </button>
               )}
@@ -469,31 +483,31 @@ export default function App() {
     const pct = Math.round((score / total) * 100);
     const badge = pct >= 90 ? "🏆 Expert" : pct >= 70 ? "🎯 Confirmé" : pct >= 50 ? "📚 Apprenti" : "🌱 Débutant";
     return (
-      <div style={{ ...s, overflowY: "auto" }}>
-        <div style={{ padding: "max(48px, env(safe-area-inset-top, 48px)) 20px 0", textAlign: "center" }}>
-          <div style={{ fontSize: 56, marginBottom: 12 }}>{pct >= 80 ? "🏆" : pct >= 60 ? "🎯" : "📚"}</div>
-          <div style={{ fontSize: 34, fontWeight: 700, color: "#C9A84C", marginBottom: 4 }}>{score}/{total}</div>
+      <div style={{ ...s, overflowY: "auto", background: "linear-gradient(170deg, #1A1006 0%, #0A040A 30%)" }}>
+        <div style={{ padding: "max(48px, env(safe-area-inset-top, 48px)) 20px 0", textAlign: "center", animation: "fadeUp 300ms ease-out" }}>
+          <div style={{ fontSize: 60, marginBottom: 12 }}>{pct >= 80 ? "🏆" : pct >= 60 ? "🎯" : "📚"}</div>
+          <div style={{ fontSize: 36, fontWeight: 700, color: "#C9A84C", marginBottom: 4, letterSpacing: -0.5 }}>{score}/{total}</div>
           <div style={{ fontSize: 14, color: "#8A7060", marginBottom: 6 }}>{pct}% de bonnes réponses</div>
           <div style={{ fontSize: 17, color: "#F0E8E0", marginBottom: 28 }}>{badge}</div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 28 }}>
-            <div style={{ background: "#1E1018", borderRadius: 14, padding: "18px 12px" }}>
-              <div style={{ fontSize: 28, fontWeight: 700, color: "#4CAF78" }}>{score}</div>
+            <div style={{ background: "linear-gradient(145deg, #1A1018, #120C10)", borderRadius: 16, padding: "18px 12px", boxShadow: "0 4px 20px #00000050, 0 0 0 1px #4CAF7820, inset 0 1px 0 #FFFFFF06" }}>
+              <div style={{ fontSize: 30, fontWeight: 700, color: "#4CAF78" }}>{score}</div>
               <div style={{ fontSize: 12, color: "#7A6B60", marginTop: 4 }}>Bonnes réponses</div>
             </div>
-            <div style={{ background: "#1E1018", borderRadius: 14, padding: "18px 12px" }}>
-              <div style={{ fontSize: 28, fontWeight: 700, color: "#C9A84C" }}>{bestStreak}</div>
+            <div style={{ background: "linear-gradient(145deg, #1A1018, #120C10)", borderRadius: 16, padding: "18px 12px", boxShadow: "0 4px 20px #00000050, 0 0 0 1px #C9A84C20, inset 0 1px 0 #FFFFFF06" }}>
+              <div style={{ fontSize: 30, fontWeight: 700, color: "#C9A84C" }}>{bestStreak}</div>
               <div style={{ fontSize: 12, color: "#7A6B60", marginTop: 4 }}>Meilleure série</div>
             </div>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12, paddingBottom: 28 }}>
             <button onClick={() => startMode("quiz")}
-              style={{ padding: "18px", background: "#C9A84C", border: "none", borderRadius: 14, color: "#0A040A", fontSize: 16, fontWeight: 700, cursor: "pointer", minHeight: 56 }}>
+              style={{ padding: "18px", background: "linear-gradient(145deg, #D4A84C, #C9A84C)", border: "none", borderRadius: 14, color: "#0A040A", fontSize: 16, fontWeight: 700, cursor: "pointer", minHeight: 56, boxShadow: "0 6px 20px #C9A84C45, inset 0 1px 0 #FFFFFF30" }}>
               Rejouer
             </button>
             <button onClick={() => startMode("flash")}
-              style={{ padding: "16px 18px", background: "#1E1018", border: "1px solid #2A1A22", borderRadius: 14, color: "#D0C8C0", fontSize: 15, cursor: "pointer", minHeight: 52 }}>
+              style={{ padding: "16px 18px", background: "linear-gradient(145deg, #1A1018, #120C10)", border: "1px solid #2A1A2260", borderRadius: 14, color: "#D0C8C0", fontSize: 15, cursor: "pointer", minHeight: 52, boxShadow: "0 2px 12px #00000040, inset 0 1px 0 #FFFFFF06" }}>
               Réviser en fiches flash
             </button>
             <button onClick={() => setScreen("home")}
@@ -510,9 +524,9 @@ export default function App() {
               {wrongVins.map(v => {
                 const cfg = CAT_CONFIG[v.c] || { color: "#C9A84C" };
                 return (
-                  <div key={v.id} style={{ background: "#140A10", border: `1px solid ${cfg.color}25`, borderRadius: 14, padding: "16px", marginBottom: 10 }}>
+                  <div key={v.id} style={{ background: "linear-gradient(145deg, #160A12, #100810)", border: `1px solid ${cfg.color}25`, borderRadius: 14, padding: "16px", marginBottom: 10, boxShadow: `0 4px 16px #00000040, 0 0 0 1px ${cfg.color}10` }}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                      <div style={{ fontSize: 15, fontWeight: 600, color: "#F0E8E0" }}>{v.nom}</div>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: "#F0E8E0", letterSpacing: -0.2 }}>{v.nom}</div>
                       <div style={{ fontSize: 11, color: cfg.color }}>{cfg.emoji} {CAT_CONFIG[v.c]?.short}</div>
                     </div>
                     <div style={{ fontSize: 13, color: "#8A7060", marginBottom: 4 }}>{v.cp}</div>
