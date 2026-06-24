@@ -71,6 +71,15 @@ export default function App() {
   const [lastCorrect, setLastCorrect] = useState(null);
   const [chosen, setChosen] = useState(null);
   const [totalQuizSessions, setTotalQuizSessions] = useState(0);
+  const [weakMode, setWeakMode] = useState(false);
+  const [vinStats, setVinStats] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("bedeau_stats") || "{}"); }
+    catch { return {}; }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("bedeau_stats", JSON.stringify(vinStats));
+  }, [vinStats]);
 
   const vinsBycat = useMemo(() => {
     const m = {};
@@ -85,16 +94,28 @@ export default function App() {
 
   const flashVins = useMemo(() => shuffle(filteredVins), [filteredVins, mode]);
 
+  const weakVins = useMemo(() => {
+    return filteredVins
+      .filter(v => (vinStats[v.id]?.w || 0) > 0)
+      .sort((a, b) => {
+        const ra = (vinStats[a.id]?.w || 0) / ((vinStats[a.id]?.w || 0) + (vinStats[a.id]?.c || 1));
+        const rb = (vinStats[b.id]?.w || 0) / ((vinStats[b.id]?.w || 0) + (vinStats[b.id]?.c || 1));
+        return rb - ra;
+      });
+  }, [filteredVins, vinStats]);
+
   const startMode = (m) => {
-    setMode(m);
+    const isWeak = m === "weak";
+    setMode(isWeak ? "quiz" : m);
+    setWeakMode(isWeak);
     setFlashIdx(0);
     setFlashFlipped(false);
     setScore(0);
     setStreak(0);
     setChosen(null);
     setLastCorrect(null);
-    if (m === "quiz") {
-      const pool = shuffle(filteredVins);
+    if (m === "quiz" || isWeak) {
+      const pool = shuffle(isWeak ? weakVins : filteredVins);
       setQuizPool(pool);
       setQuizDone([]);
       setTotalQuizSessions(s => s + 1);
@@ -112,6 +133,11 @@ export default function App() {
     setChosen(opt);
     const correct = opt === quizQ.reponse;
     setLastCorrect(correct);
+    const vinId = quizQ.vin.id;
+    setVinStats(prev => {
+      const cur = prev[vinId] || { w: 0, c: 0 };
+      return { ...prev, [vinId]: correct ? { ...cur, c: cur.c + 1 } : { ...cur, w: cur.w + 1 } };
+    });
     if (correct) {
       setScore(s => s + 1);
       setStreak(s => {
@@ -143,6 +169,9 @@ export default function App() {
   };
 
   const activeVins = filteredVins;
+
+  const totalAnswered = Object.values(vinStats).reduce((acc, v) => acc + v.w + v.c, 0);
+  const masteredCount = Object.entries(vinStats).filter(([, v]) => v.c > 0 && v.w === 0).length;
 
   // ─── SCREENS ────────────────────────────────────────────────────────────────
 
@@ -192,6 +221,24 @@ export default function App() {
           <div style={{ fontSize: 20, marginBottom: 4 }}>🎯 Quiz Sommelier</div>
           <div style={{ fontSize: 13, color: "#8A7060" }}>QCM sur les cépages, profils et origines — {activeVins.length} questions</div>
         </button>
+
+        {weakVins.length > 0 && (
+          <button onClick={() => startMode("weak")}
+            style={{ background: "#1E0A0A", border: "1px solid #C44858", borderRadius: 12, padding: "18px 20px", textAlign: "left", cursor: "pointer", color: "#F0E8E0" }}>
+            <div style={{ fontSize: 20, marginBottom: 4 }}>📍 Points faibles <span style={{ fontSize: 14, color: "#C44858" }}>({weakVins.length})</span></div>
+            <div style={{ fontSize: 13, color: "#8A7060" }}>Révise uniquement les vins que tu as ratés — triés par taux d'erreur</div>
+          </button>
+        )}
+
+        {totalAnswered > 0 && (
+          <div style={{ background: "#140A10", border: "1px solid #2A1A22", borderRadius: 12, padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ fontSize: 12, color: "#7A6B60" }}>Progression globale</div>
+            <div style={{ display: "flex", gap: 16, fontSize: 13 }}>
+              <span style={{ color: "#4CAF78" }}>✓ {masteredCount} maîtrisés</span>
+              <span style={{ color: "#C44858" }}>✗ {weakVins.length} à revoir</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -277,8 +324,8 @@ export default function App() {
         </div>
 
         <div style={{ padding: "20px 20px 8px" }}>
-          <div style={{ fontSize: 11, letterSpacing: 2, color: cfg.color, textTransform: "uppercase", marginBottom: 10 }}>
-            {cfg.emoji} {CAT_CONFIG[quizQ.vin.c]?.short} · {types[quizQ.type] || "Quiz"}
+          <div style={{ fontSize: 11, letterSpacing: 2, color: weakMode ? "#C44858" : cfg.color, textTransform: "uppercase", marginBottom: 10 }}>
+            {weakMode ? "📍 Points faibles · " : `${cfg.emoji} ${CAT_CONFIG[quizQ.vin.c]?.short} · `}{types[quizQ.type] || "Quiz"}
           </div>
           <div style={{ fontSize: 16, color: "#F0E8E0", lineHeight: 1.6, minHeight: 90, whiteSpace: "pre-line" }}>{quizQ.question}</div>
         </div>
