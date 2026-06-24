@@ -13,6 +13,34 @@ const CAT_CONFIG = {
 
 const ALL_CATS = Object.keys(CAT_CONFIG);
 
+const CEPAGES = [
+  {id:"CP01",nom:"Chardonnay",couleur:"blanc",regions:"Bourgogne, Chablis, Champagne, Californie",profil:"Beurré, rond, minéral selon terroir ; pomme, citron, noisette, vanille",style:"Léger et minéral en Chablis, riche et boisé en Meursault ou Napa Valley",memo:"Le cépage blanc le plus planté au monde — caméléon du terroir, il exprime avant tout son lieu d'origine"},
+  {id:"CP02",nom:"Sauvignon Blanc",couleur:"blanc",regions:"Loire (Sancerre, Pouilly), Bordeaux, Nouvelle-Zélande",profil:"Vif, herbacé, aromatique ; buis, pamplemousse, herbe fraîche, fruit de la passion",style:"Sec, nerveux, grande fraîcheur ; rarement boisé sauf en Bordeaux blanc",memo:"Signature végétale et agrumée inimitable — roi de Sancerre et de Marlborough"},
+  {id:"CP03",nom:"Riesling",couleur:"blanc",regions:"Alsace, Moselle, Rhénanie, Autriche, Australie",profil:"Électrisant, minéral, pétrolé avec l'âge ; lime, fleur blanche, ardoise",style:"Du sec au moelleux exceptionnel, toujours une acidité tranchante et une très longue vie",memo:"Le grand cépage blanc de garde — acquiert avec l'âge une note pétrolée caractéristique"},
+  {id:"CP04",nom:"Chenin Blanc",couleur:"blanc",regions:"Loire (Vouvray, Savennières), Afrique du Sud",profil:"Miel, cire d'abeille, coing, pomme compotée, fleur blanche ; acidité vive",style:"Du sec minéral (Savennières) au moelleux exceptionnel (Quarts de Chaume)",memo:"Cépage caméléon de la Loire — peut vieillir 50 ans et produire les plus grands liquoreux du monde"},
+  {id:"CP05",nom:"Pinot Gris",couleur:"blanc",regions:"Alsace, Italie du Nord (Pinot Grigio), Oregon, Allemagne",profil:"Riche, épicé, fumé ; pêche, poire, gingembre, parfois miel",style:"Du léger et nerveux (Pinot Grigio) au opulent et épicé (Alsace Grand Cru)",memo:"Même cépage, deux visages : Pinot Grigio en Italie (léger) et Pinot Gris en Alsace (puissant)"},
+  {id:"CP06",nom:"Gewurztraminer",couleur:"blanc",regions:"Alsace, Allemagne, Italie du Nord, Autriche",profil:"Très aromatique, exubérant ; rose, litchi, mangue, gingembre, pétale de fleur",style:"Sec à liquoreux, toujours très parfumé et peu acide",memo:"Le cépage le plus identifiable au nez — si ça sent la rose et le litchi, c'est souvent lui"},
+  {id:"CP07",nom:"Viognier",couleur:"blanc",regions:"Rhône Nord (Condrieu), Languedoc, Californie",profil:"Floral, opulent, riche ; abricot, pêche blanche, violette, épices douces",style:"Sec, généreux, peu acide ; parfois co-fermenté avec la Syrah dans le Rhône Nord",memo:"Cépage du Condrieu — failli disparaître, aujourd'hui planté dans le monde entier"},
+  {id:"CP08",nom:"Melon de Bourgogne",couleur:"blanc",regions:"Muscadet, Loire Atlantique (France uniquement)",profil:"Salin, iodé, neutre ; citron, pomme verte, craie, parfois légère algue",style:"Sec, très minéral, léger ; idéal avec les fruits de mer et les huîtres",memo:"Seul cépage du Muscadet — à chercher 'sur lie' pour plus de texture et de complexité"},
+  {id:"CP09",nom:"Grüner Veltliner",couleur:"blanc",regions:"Autriche (Wachau, Kamptal, Kremstal)",profil:"Végétal, épicé, minéral ; poivre blanc, pamplemousse, herbes de prairie, silex",style:"Du léger et perlant au grand vin de garde selon la classification Smaragd",memo:"Cépage emblématique de l'Autriche — reconnaissable à sa note distinctive de poivre blanc"},
+  {id:"CP10",nom:"Muscat",couleur:"blanc",regions:"Alsace, Roussillon, Italie (Asti), Grèce",profil:"Très aromatique, raisin frais ; fleur d'oranger, pêche, rose, miel léger",style:"Du sec en Alsace au doux effervescent (Asti) au fortifié (Muscat de Rivesaltes)",memo:"Le seul cépage dont le vin sent le raisin frais — identifiable au premier nez"},
+  {id:"CP11",nom:"Pinot Noir",couleur:"rouge",regions:"Bourgogne, Champagne, Oregon, Nouvelle-Zélande, Alsace",profil:"Délicat, élégant, soyeux ; cerise, framboise, pivoine, sous-bois, épices",style:"Léger à moyen corps, tannins fins, acidité marquée ; grand potentiel de garde",memo:"Le 'saint Graal' des vins rouges — difficile à cultiver, magique en Bourgogne"},
+  {id:"CP12",nom:"Cabernet Sauvignon",couleur:"rouge",regions:"Médoc (Bordeaux), Napa Valley, Chili, Australie",profil:"Structuré, tannique, austère jeune ; cassis, cèdre, tabac, graphite, poivron rouge",style:"Corsé, grand tanin, longue garde ; souvent assemblé avec Merlot et Cabernet Franc",memo:"Le cépage rouge le plus planté au monde — roi du Médoc, star de Napa Valley"},
+  {id:"CP13",nom:"Merlot",couleur:"rouge",regions:"Saint-Émilion, Pomerol (Bordeaux), Italie, Californie",profil:"Souple, charnu, accessible ; prune, cerise noire, chocolat, laurier",style:"Plus rond et doux que le Cabernet Sauvignon, mûrit plus tôt, moins tannique",memo:"Dominant à Pomerol (Pétrus) et Saint-Émilion — le cépage 'velouté' du Bordelais"},
+  {id:"CP14",nom:"Cabernet Franc",couleur:"rouge",regions:"Loire (Chinon, Bourgueil), Bordeaux, Ontario, Argentine",profil:"Frais, herbacé, élégant ; violette, framboise, poivron vert, graphite",style:"Plus léger que le Cab. Sauvignon, plus aromatique et végétal, moins tannique",memo:"Parent du Cabernet Sauvignon — star en Loire (Chinon) et base des grands Bordeaux"},
+  {id:"CP15",nom:"Syrah",couleur:"rouge",regions:"Rhône Nord (Hermitage, Cornas), Australie (Shiraz)",profil:"Intense, épicé, animal ; mûre, olive noire, poivre noir, violette, réglisse, fumé",style:"Puissant et sombre dans le Rhône Nord, fruité et chaleureux en Australie (Shiraz)",memo:"Même cépage, deux styles : Syrah élégante (Rhône) vs Shiraz généreuse (Australie)"},
+  {id:"CP16",nom:"Grenache",couleur:"rouge",regions:"Rhône Sud (Châteauneuf-du-Pape), Espagne, Languedoc",profil:"Chaleureux, fruité, haut degré ; fruit rouge mûr, épices, réglisse, garrigue",style:"Souple, peu tannique, haut degré d'alcool ; souvent assemblé GSM avec Syrah et Mourvèdre",memo:"Base du Châteauneuf-du-Pape et du Priorat espagnol — cépage de soleil par excellence"},
+  {id:"CP17",nom:"Gamay",couleur:"rouge",regions:"Beaujolais, Loire, Suisse, Savoie",profil:"Léger, fruité, croquant ; cerise, framboise, pivoine, bonbon (si macération carbonique)",style:"Peu tannique, acidité vive, à boire jeune et frais ; les 10 crus du Beaujolais peuvent vieillir",memo:"Cépage du Beaujolais — apprécié pour sa légèreté et fraîcheur, les crus sont sérieux"},
+  {id:"CP18",nom:"Nebbiolo",couleur:"rouge",regions:"Piémont (Barolo, Barbaresco), Valtellina (Lombardie)",profil:"Austère jeune, très tannique, haute acidité ; rose séchée, goudron, cerise, réglisse",style:"Demande des années de garde pour s'assouplir — parmi les vins les plus longévifs au monde",memo:"'Goudron et roses' — seul cépage autorisé en Barolo et Barbaresco"},
+  {id:"CP19",nom:"Sangiovese",couleur:"rouge",regions:"Toscane (Chianti, Brunello, Vino Nobile), Ombrie",profil:"Acide, tannique, sec ; cerise acide, tomate séchée, herbes, tabac, cuir",style:"Du Chianti léger au Brunello de garde de 20 ans et plus selon la sélection",memo:"Cépage roi de Toscane — le Brunello est 100% Sangiovese, le Chianti Classico en est dominé"},
+  {id:"CP20",nom:"Tempranillo",couleur:"rouge",regions:"Rioja, Ribera del Duero, Portugal (Tinta Roriz)",profil:"Fruité, épicé, évolue vite ; cerise, fraise, vanille (bois), cuir, tabac",style:"Du jeune fruité (Joven) au très évolué (Gran Reserva) selon durée d'élevage",memo:"Cépage emblématique de l'Espagne — appelé Tinta Roriz au Portugal dans les assemblages de Porto"},
+  {id:"CP21",nom:"Malbec",couleur:"rouge",regions:"Mendoza (Argentine), Cahors (France)",profil:"Fruité, charnu, velouté ; prune, mûre, violette, chocolat noir, réglisse",style:"Souple et accessible en Argentine, plus rustique et tannique en Cahors",memo:"Originaire de Cahors (France) mais révélé en Argentine — Mendoza est sa capitale mondiale"},
+  {id:"CP22",nom:"Barbera",couleur:"rouge",regions:"Piémont (Barbera d'Asti, Barbera d'Alba)",profil:"Fruité, acidulé, peu tannique ; cerise griotte, framboise, épices douces",style:"Accessible, vif, bon accord table — compense sa faible tannicité par une haute acidité naturelle",memo:"Le rouge du quotidien piémontais — plus abordable que le Barolo, mais vif et sincère"},
+  {id:"CP23",nom:"Mourvèdre",couleur:"rouge",regions:"Bandol (Provence), Rhône, Espagne (Monastrell)",profil:"Rustique, animal, épicé ; viande, réglisse, mûre, violette, garrigue, poivre",style:"Tannique, sombre, a besoin de chaleur et d'élevage ; pilier de l'assemblage GSM",memo:"Appelé Monastrell en Espagne — donne sa mesure à Bandol, toujours en assemblage au Rhône"},
+  {id:"CP24",nom:"Blaufränkisch",couleur:"rouge",regions:"Autriche (Burgenland), Allemagne, Hongrie",profil:"Vif, précis, épicé ; groseille, cerise kirschée, poivre blanc, herbe fumée",style:"Léger à moyen corps, acidité marquée, tannin fin — élégant même en très jeune âge",memo:"Le grand cépage rouge autrichien — léger comme un Pinot Noir mais avec plus de poivre et de caractère"},
+  {id:"CP25",nom:"Zinfandel",couleur:"rouge",regions:"Californie, Italie du Sud (Primitivo en Apulie)",profil:"Généreux, chaleureux, haut degré ; mûre confiture, épices, chocolat, tabac",style:"Du rosé doux (White Zinfandel) au rouge puissant et corsé — grande variation de styles",memo:"Cépage identitaire de Californie — le même qu'en Italie (Primitivo), probablement d'origine croate"},
+];
+
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -54,6 +82,33 @@ function genQuestion(vin, pool) {
   return { vin, question, reponse, options, type };
 }
 
+function genCepageQuestion(cep, pool) {
+  const types = ["profil", "regions", "style"];
+  const type = types[Math.floor(Math.random() * types.length)];
+  const sameCouleur = pool.filter(c => c.couleur === cep.couleur && c.id !== cep.id);
+  let question, reponse, options;
+  if (type === "profil") {
+    question = `Quel cépage correspond à ce profil aromatique ?\n\n« ${cep.profil} »`;
+    reponse = cep.nom;
+    const dist = pick([...new Set(sameCouleur.map(c => c.nom))], 3, cep.nom);
+    if (dist.length < 3) return genCepageQuestion(cep, pool);
+    options = shuffle([reponse, ...dist]);
+  } else if (type === "regions") {
+    question = `Dans quelles régions trouve-t-on principalement\n\n${cep.nom} ?`;
+    reponse = cep.regions;
+    const dist = pick([...new Set(pool.filter(c => c.id !== cep.id).map(c => c.regions))], 3);
+    if (dist.length < 3) return genCepageQuestion(cep, pool);
+    options = shuffle([reponse, ...dist]);
+  } else {
+    question = `Quel cépage produit ce style de vin ?\n\n« ${cep.style} »`;
+    reponse = cep.nom;
+    const dist = pick([...new Set(sameCouleur.map(c => c.nom))], 3, cep.nom);
+    if (dist.length < 3) return genCepageQuestion(cep, pool);
+    options = shuffle([reponse, ...dist]);
+  }
+  return { cep, question, reponse, options, type };
+}
+
 const s = { background: "#0A040A", color: "#F0E8E0", fontFamily: "system-ui, -apple-system, sans-serif", minHeight: "100dvh", maxWidth: 480, margin: "0 auto", padding: 0, overflowX: "hidden" };
 
 export default function App() {
@@ -86,6 +141,19 @@ export default function App() {
   const [flashFlipping, setFlashFlipping] = useState(false);
   const [flashVinsOverride, setFlashVinsOverride] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  // ── Cépages module ──
+  const [cepIdx, setCepIdx] = useState(0);
+  const [cepFlipped, setCepFlipped] = useState(false);
+  const [cepFlipping, setCepFlipping] = useState(false);
+  const [cepPool, setCepPool] = useState([]);
+  const [cepQ, setCepQ] = useState(null);
+  const [cepDone, setCepDone] = useState([]);
+  const [cepScore, setCepScore] = useState(0);
+  const [cepStreak, setCepStreak] = useState(0);
+  const [cepBestStreak, setCepBestStreak] = useState(0);
+  const [cepChosen, setCepChosen] = useState(null);
+  const [cepLastCorrect, setCepLastCorrect] = useState(null);
+  const [cepWrong, setCepWrong] = useState([]);
   const touchStartX = useRef(null);
 
   useEffect(() => {
@@ -235,6 +303,62 @@ export default function App() {
     }
   };
 
+  const startCepageMode = (m) => {
+    const pool = shuffle(CEPAGES);
+    setCepPool(pool);
+    setCepIdx(0);
+    setCepFlipped(false);
+    setCepFlipping(false);
+    setCepScore(0);
+    setCepStreak(0);
+    setCepChosen(null);
+    setCepLastCorrect(null);
+    setCepWrong([]);
+    setCepDone([]);
+    if (m === "quiz") {
+      setCepQ(genCepageQuestion(pool[0], pool));
+    }
+    setScreen(m === "quiz" ? "cep-quiz" : "cep-flash");
+  };
+
+  const animateCepFlip = (action) => {
+    if (cepFlipping) return;
+    setCepFlipping(true);
+    setTimeout(() => { action(); setCepFlipping(false); }, 160);
+  };
+
+  const nextCep = () => animateCepFlip(() => { setCepIdx(i => (i + 1) % CEPAGES.length); setCepFlipped(false); });
+  const prevCep = () => animateCepFlip(() => { setCepIdx(i => (i - 1 + CEPAGES.length) % CEPAGES.length); setCepFlipped(false); });
+
+  const handleCepAnswer = (opt) => {
+    if (cepChosen) return;
+    setCepChosen(opt);
+    const correct = opt === cepQ.reponse;
+    setCepLastCorrect(correct);
+    if (correct) {
+      setCepScore(s => s + 1);
+      setCepStreak(s => { const ns = s + 1; setCepBestStreak(b => Math.max(b, ns)); return ns; });
+      setTimeout(() => advanceCep(), 1000);
+    } else {
+      setCepStreak(0);
+      setCepWrong(prev => [...prev, cepQ.cep]);
+    }
+  };
+
+  const advanceCep = () => {
+    const nextDone = [...cepDone, cepQ.cep.id];
+    const remaining = cepPool.filter(c => !nextDone.includes(c.id));
+    if (remaining.length === 0) {
+      setCepDone(nextDone);
+      setScreen("cep-results");
+    } else {
+      setCepQ(genCepageQuestion(remaining[0], cepPool));
+      setCepDone(nextDone);
+      setCepChosen(null);
+      setCepLastCorrect(null);
+    }
+  };
+
   const toggleCat = (c) => {
     setSelectedCats(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c]);
   };
@@ -343,6 +467,21 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* ── Section Cépages ── */}
+        <div style={{ borderTop: "1px solid #2A1A2230", marginTop: 8, paddingTop: 16 }}>
+          <div style={{ fontSize: 11, letterSpacing: 2, color: "#8A7060", textTransform: "uppercase", marginBottom: 8 }}>Apprendre les cépages</div>
+          <button onClick={() => startCepageMode("flash")}
+            style={{ width: "100%", background: "linear-gradient(145deg, #0E1820, #0A1018)", border: "1px solid #8FBCDA40", borderRadius: 14, padding: "18px 20px", textAlign: "left", cursor: "pointer", color: "#F0E8E0", boxShadow: "0 2px 16px #00000050, inset 0 1px 0 #FFFFFF08", marginBottom: 10 }}>
+            <div style={{ fontSize: 20, marginBottom: 6 }}>🍇 Fiches Cépages</div>
+            <div style={{ fontSize: 13, color: "#8A7060", lineHeight: 1.5 }}>{CEPAGES.length} cépages essentiels — profil, régions, style, mémo</div>
+          </button>
+          <button onClick={() => startCepageMode("quiz")}
+            style={{ width: "100%", background: "linear-gradient(145deg, #0E1820, #0A1018)", border: "1px solid #8FBCDA40", borderRadius: 14, padding: "18px 20px", textAlign: "left", cursor: "pointer", color: "#F0E8E0", boxShadow: "0 2px 16px #00000050, inset 0 1px 0 #FFFFFF08" }}>
+            <div style={{ fontSize: 20, marginBottom: 6 }}>🎓 Quiz Cépages</div>
+            <div style={{ fontSize: 13, color: "#8A7060", lineHeight: 1.5 }}>Identifie les cépages par profil, régions et style de vin</div>
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -620,6 +759,213 @@ export default function App() {
             <div style={{ textAlign: "center", padding: "60px 20px", color: "#4A3A40" }}>
               <div style={{ fontSize: 36, marginBottom: 12 }}>🔍</div>
               <div style={{ fontSize: 14 }}>Aucun vin trouvé</div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── CÉPAGES — FICHES FLASH ──────────────────────────────────────────────────
+  if (screen === "cep-flash") {
+    const cep = cepPool[cepIdx] || CEPAGES[0];
+    const couleurCfg = cep.couleur === "blanc"
+      ? { color: "#E8D5A3", bg: "#1E1A0E", accent: "#C9A84C" }
+      : { color: "#C4506A", bg: "#1E0812", accent: "#C44878" };
+    return (
+      <div style={{ ...s, display: "flex", flexDirection: "column", background: `linear-gradient(170deg, ${couleurCfg.bg} 0%, #0A040A 30%)` }}>
+        <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#0A040ABB", backdropFilter: "blur(12px)", borderBottom: "1px solid #2A1A2260" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px" }}>
+            <button onClick={() => setScreen("home")} style={{ background: "none", border: "none", color: "#8A7060", fontSize: 26, cursor: "pointer", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center" }}>←</button>
+            <div style={{ fontSize: 13, color: "#7A6B60" }}>{cepIdx + 1} / {CEPAGES.length}</div>
+            <div style={{ fontSize: 13, color: couleurCfg.color }}>{cep.couleur === "blanc" ? "🥂 Blanc" : "🍷 Rouge"}</div>
+          </div>
+          <div style={{ height: 3, background: "#2A1A22" }}>
+            <div style={{ height: "100%", width: `${((cepIdx + 1) / CEPAGES.length) * 100}%`, background: `linear-gradient(90deg, ${couleurCfg.accent}AA, ${couleurCfg.accent})`, transition: "width .4s cubic-bezier(.4,0,.2,1)", borderRadius: "0 2px 2px 0" }} />
+          </div>
+        </div>
+
+        <div style={{ flex: 1, padding: "12px 16px 0", display: "flex", flexDirection: "column" }}>
+          <div
+            onClick={() => animateCepFlip(() => setCepFlipped(f => !f))}
+            onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+            onTouchEnd={e => {
+              if (touchStartX.current === null) return;
+              const delta = e.changedTouches[0].clientX - touchStartX.current;
+              if (Math.abs(delta) > 50) { delta < 0 ? nextCep() : prevCep(); }
+              else { animateCepFlip(() => setCepFlipped(f => !f)); }
+              touchStartX.current = null;
+            }}
+            style={{ flex: 1, background: "linear-gradient(160deg, #1E1018, #120810)", border: `1px solid ${couleurCfg.color}35`, borderRadius: 22, padding: "24px 20px 56px", cursor: "pointer", marginBottom: 12, position: "relative", userSelect: "none", minHeight: 320, boxShadow: `0 8px 32px #00000060, 0 0 0 1px ${couleurCfg.color}10, inset 0 1px 0 #FFFFFF08`, opacity: cepFlipping ? 0 : 1, transform: cepFlipping ? "scale(0.97)" : "scale(1)", transition: "opacity 160ms ease, transform 160ms ease" }}>
+            {!cepFlipped ? (
+              <>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: couleurCfg.color, textTransform: "uppercase", marginBottom: 14 }}>Cépage {cep.couleur}</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: "#F0E8E0", lineHeight: 1.2, marginBottom: 14, letterSpacing: -0.5 }}>{cep.nom}</div>
+                <div style={{ fontSize: 12, color: "#6A5A60", fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 6 }}>Régions clés</div>
+                <div style={{ fontSize: 14, color: "#C0B8B0", lineHeight: 1.6, marginBottom: 16 }}>{cep.regions}</div>
+                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 20px", borderTop: `1px solid ${couleurCfg.color}15`, fontSize: 12, color: "#3A2A30" }}>
+                  <span>← swipe</span>
+                  <span style={{ color: couleurCfg.color + "70" }}>Toucher · retourner</span>
+                  <span>swipe →</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: couleurCfg.color, textTransform: "uppercase", marginBottom: 14 }}>Fiche technique</div>
+                <div style={{ fontSize: 11, color: "#6A5A60", fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>Profil aromatique</div>
+                <div style={{ fontSize: 14, color: "#D0C8C0", marginBottom: 14, lineHeight: 1.55 }}>{cep.profil}</div>
+                <div style={{ fontSize: 11, color: "#6A5A60", fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4 }}>Style de vin</div>
+                <div style={{ fontSize: 14, color: "#D0C8C0", marginBottom: 14, lineHeight: 1.55 }}>{cep.style}</div>
+                <div style={{ fontSize: 11, color: "#6A5A60", fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 6 }}>À retenir</div>
+                <div style={{ fontSize: 14, color: couleurCfg.color, lineHeight: 1.65, fontStyle: "italic" }}>{cep.memo}</div>
+              </>
+            )}
+          </div>
+          <div style={{ display: "flex", gap: 10, paddingBottom: "max(20px, env(safe-area-inset-bottom, 20px))" }}>
+            <button onClick={prevCep} style={{ flex: 1, padding: "18px 0", background: "linear-gradient(145deg, #1A1018, #120A10)", border: "1px solid #2A1A2260", borderRadius: 14, color: "#A09080", fontSize: 22, cursor: "pointer", minHeight: 56, boxShadow: "0 2px 12px #00000040" }}>←</button>
+            <button onClick={() => animateCepFlip(() => setCepFlipped(f => !f))}
+              style={{ flex: 2, padding: "18px 0", background: cepFlipped ? couleurCfg.accent : "linear-gradient(145deg, #1A1018, #120A10)", border: `1px solid ${couleurCfg.color}${cepFlipped ? "FF" : "40"}`, borderRadius: 14, color: cepFlipped ? "#0A040A" : couleurCfg.color, fontSize: 14, fontWeight: 700, cursor: "pointer", minHeight: 56, boxShadow: cepFlipped ? `0 4px 16px ${couleurCfg.accent}50` : "0 2px 12px #00000040" }}>
+              {cepFlipped ? "Voir recto" : "Voir la fiche"}
+            </button>
+            <button onClick={nextCep} style={{ flex: 1, padding: "18px 0", background: "linear-gradient(145deg, #1A1018, #120A10)", border: "1px solid #2A1A2260", borderRadius: 14, color: "#A09080", fontSize: 22, cursor: "pointer", minHeight: 56, boxShadow: "0 2px 12px #00000040" }}>→</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── CÉPAGES — QUIZ ──────────────────────────────────────────────────────────
+  if (screen === "cep-quiz" && cepQ) {
+    const total = CEPAGES.length;
+    const answered = cepDone.length;
+    const couleurCfg = cepQ.cep.couleur === "blanc"
+      ? { color: "#E8D5A3", accent: "#C9A84C" }
+      : { color: "#C4506A", accent: "#C44878" };
+    const typeLabel = { profil: "Identifie le cépage", regions: "Identifie les régions", style: "Identifie le cépage" };
+    return (
+      <div style={{ ...s, display: "flex", flexDirection: "column", background: "linear-gradient(170deg, #0E1410 0%, #0A040A 28%)" }}>
+        <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#0A040ABB", backdropFilter: "blur(12px)", borderBottom: "1px solid #2A1A2260" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px" }}>
+            <button onClick={() => setScreen("home")} style={{ background: "none", border: "none", color: "#8A7060", fontSize: 24, cursor: "pointer", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center" }}>✕</button>
+            <div style={{ display: "flex", gap: 16, fontSize: 14 }}>
+              <span style={{ color: "#4CAF78", fontWeight: 700 }}>✓ {cepScore}</span>
+              {cepStreak >= 2 && <span style={{ color: "#C9A84C", fontWeight: 700 }}>🔥 {cepStreak}</span>}
+            </div>
+            <div style={{ fontSize: 13, color: "#7A6B60" }}>{answered + 1} / {total}</div>
+          </div>
+          <div style={{ height: 4, background: "#1A0E18" }}>
+            <div style={{ height: "100%", width: `${(answered / total) * 100}%`, background: "linear-gradient(90deg, #2E7D52, #4CAF78)", transition: "width .5s cubic-bezier(.4,0,.2,1)", borderRadius: "0 2px 2px 0" }} />
+          </div>
+        </div>
+
+        <div style={{ padding: "18px 20px 10px" }}>
+          <div style={{ fontSize: 11, letterSpacing: 2, color: couleurCfg.color, textTransform: "uppercase", marginBottom: 12 }}>
+            🍇 {cepQ.cep.couleur === "blanc" ? "Blanc" : "Rouge"} · {typeLabel[cepQ.type] || "Quiz"}
+          </div>
+          <div style={{ fontSize: 17, color: "#F0E8E0", lineHeight: 1.65, whiteSpace: "pre-line", letterSpacing: -0.1 }}>{cepQ.question}</div>
+        </div>
+
+        <div style={{ padding: "8px 20px", paddingBottom: "max(24px, env(safe-area-inset-bottom, 24px))", display: "flex", flexDirection: "column", gap: 10, flex: 1 }}>
+          {cepQ.options.map(opt => {
+            const isCorrect = cepChosen && opt === cepQ.reponse;
+            const isWrong = cepChosen && opt === cepChosen && !isCorrect;
+            const isDimmed = cepChosen && opt !== cepQ.reponse && opt !== cepChosen;
+            let bg = "linear-gradient(145deg, #1E1018, #160C14)";
+            let border = "1px solid #2A1A2260";
+            let color = "#D0C8C0";
+            let shadow = "0 2px 10px #00000040, inset 0 1px 0 #FFFFFF06";
+            if (isCorrect) { bg = "linear-gradient(145deg, #0A2818, #082010)"; border = "1px solid #4CAF78"; color = "#4CAF78"; shadow = "0 0 20px #4CAF7830"; }
+            else if (isWrong) { bg = "linear-gradient(145deg, #280A10, #200810)"; border = "1px solid #C44858"; color = "#C44858"; shadow = "0 0 12px #C4485820"; }
+            else if (isDimmed) { color = "#3A2A30"; shadow = "none"; border = "1px solid #1A1018"; }
+            return (
+              <button key={opt} onClick={() => handleCepAnswer(opt)}
+                style={{ background: bg, border, borderRadius: 14, padding: "16px 18px", textAlign: "left", cursor: cepChosen ? "default" : "pointer", color, fontSize: 14, lineHeight: 1.45, transition: "all 250ms ease", minHeight: 54, boxShadow: shadow }}>
+                {opt}
+              </button>
+            );
+          })}
+
+          {cepChosen && cepLastCorrect !== null && (
+            <div style={{ marginTop: 4, animation: "fadeUp 200ms ease-out" }}>
+              <div style={{ background: cepLastCorrect ? "linear-gradient(145deg, #0C2814, #0A2010)" : "linear-gradient(145deg, #280C10, #200810)", border: `1px solid ${cepLastCorrect ? "#4CAF78" : "#C44858"}`, borderRadius: 12, padding: "14px 16px", fontSize: 14, color: cepLastCorrect ? "#4CAF78" : "#C44858", fontWeight: 600, boxShadow: cepLastCorrect ? "0 0 20px #4CAF7825" : "0 0 16px #C4485820" }}>
+                {cepLastCorrect ? (cepStreak >= 3 ? `🔥 ${cepStreak} en série !` : "✓ Bonne réponse !") : `✗ Réponse : ${cepQ.reponse}`}
+              </div>
+              {!cepLastCorrect && (
+                <div style={{ marginTop: 8, fontSize: 13, color: "#8A7060", fontStyle: "italic", lineHeight: 1.6 }}>
+                  {cepQ.cep.memo}
+                </div>
+              )}
+              {!cepLastCorrect && (
+                <button onClick={advanceCep}
+                  style={{ marginTop: 12, width: "100%", padding: "16px", background: "linear-gradient(145deg, #D4A84C, #C9A84C)", border: "none", borderRadius: 14, color: "#0A040A", fontSize: 15, fontWeight: 700, cursor: "pointer", minHeight: 52, boxShadow: "0 4px 16px #C9A84C40, inset 0 1px 0 #FFFFFF30" }}>
+                  Question suivante →
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── CÉPAGES — RÉSULTATS ─────────────────────────────────────────────────────
+  if (screen === "cep-results") {
+    const total = CEPAGES.length;
+    const pct = Math.round((cepScore / total) * 100);
+    const badge = pct >= 90 ? "🏆 Expert" : pct >= 70 ? "🎯 Confirmé" : pct >= 50 ? "📚 Apprenti" : "🌱 Débutant";
+    return (
+      <div style={{ ...s, overflowY: "auto", background: "linear-gradient(170deg, #0E1810 0%, #0A040A 30%)" }}>
+        <div style={{ padding: "max(48px, env(safe-area-inset-top, 48px)) 20px 0", textAlign: "center", animation: "fadeUp 300ms ease-out" }}>
+          <div style={{ fontSize: 60, marginBottom: 12 }}>{pct >= 80 ? "🏆" : pct >= 60 ? "🎯" : "📚"}</div>
+          <div style={{ fontSize: 36, fontWeight: 700, color: "#4CAF78", marginBottom: 4, letterSpacing: -0.5 }}>{cepScore}/{total}</div>
+          <div style={{ fontSize: 14, color: "#8A7060", marginBottom: 6 }}>{pct}% de bonnes réponses</div>
+          <div style={{ fontSize: 17, color: "#F0E8E0", marginBottom: 28 }}>{badge}</div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 28 }}>
+            <div style={{ background: "linear-gradient(145deg, #1A1018, #120C10)", borderRadius: 16, padding: "18px 12px", boxShadow: "0 4px 20px #00000050, 0 0 0 1px #4CAF7820" }}>
+              <div style={{ fontSize: 30, fontWeight: 700, color: "#4CAF78" }}>{cepScore}</div>
+              <div style={{ fontSize: 12, color: "#7A6B60", marginTop: 4 }}>Bonnes réponses</div>
+            </div>
+            <div style={{ background: "linear-gradient(145deg, #1A1018, #120C10)", borderRadius: 16, padding: "18px 12px", boxShadow: "0 4px 20px #00000050, 0 0 0 1px #C9A84C20" }}>
+              <div style={{ fontSize: 30, fontWeight: 700, color: "#C9A84C" }}>{cepBestStreak}</div>
+              <div style={{ fontSize: 12, color: "#7A6B60", marginTop: 4 }}>Meilleure série</div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, paddingBottom: 28 }}>
+            <button onClick={() => startCepageMode("quiz")}
+              style={{ padding: "18px", background: "linear-gradient(145deg, #4CAF78, #3A9F68)", border: "none", borderRadius: 14, color: "#0A040A", fontSize: 16, fontWeight: 700, cursor: "pointer", minHeight: 56, boxShadow: "0 6px 20px #4CAF7845, inset 0 1px 0 #FFFFFF30" }}>
+              Rejouer
+            </button>
+            <button onClick={() => startCepageMode("flash")}
+              style={{ padding: "16px 18px", background: "linear-gradient(145deg, #1A1018, #120C10)", border: "1px solid #2A1A2260", borderRadius: 14, color: "#D0C8C0", fontSize: 15, cursor: "pointer", minHeight: 52, boxShadow: "0 2px 12px #00000040" }}>
+              Réviser en fiches
+            </button>
+            <button onClick={() => setScreen("home")}
+              style={{ padding: "14px", background: "none", border: "none", color: "#7A6B60", fontSize: 14, cursor: "pointer", minHeight: 44 }}>
+              Retour à l'accueil
+            </button>
+          </div>
+
+          {cepWrong.length > 0 && (
+            <div style={{ paddingBottom: "max(40px, env(safe-area-inset-bottom, 40px))", textAlign: "left" }}>
+              <div style={{ fontSize: 11, letterSpacing: 2, color: "#C44858", textTransform: "uppercase", marginBottom: 14 }}>
+                À revoir · {cepWrong.length} cépage{cepWrong.length > 1 ? "s" : ""}
+              </div>
+              {cepWrong.map(c => {
+                const cc = c.couleur === "blanc" ? { color: "#E8D5A3", label: "🥂 Blanc" } : { color: "#C4506A", label: "🍷 Rouge" };
+                return (
+                  <div key={c.id} style={{ background: "linear-gradient(145deg, #160A12, #100810)", border: `1px solid ${cc.color}25`, borderRadius: 14, padding: "16px", marginBottom: 10, boxShadow: `0 4px 16px #00000040` }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: "#F0E8E0" }}>{c.nom}</div>
+                      <div style={{ fontSize: 12, color: cc.color }}>{cc.label}</div>
+                    </div>
+                    <div style={{ fontSize: 13, color: "#8A7060", marginBottom: 4 }}>{c.regions}</div>
+                    <div style={{ fontSize: 13, color: "#A09080", lineHeight: 1.55, marginBottom: 6 }}>{c.profil}</div>
+                    <div style={{ fontSize: 13, color: cc.color, fontStyle: "italic", lineHeight: 1.55 }}>{c.memo}</div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
