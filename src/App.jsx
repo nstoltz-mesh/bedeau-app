@@ -202,7 +202,7 @@ export default function App() {
         setChosen(null);
         setLastCorrect(null);
       }
-    }, 1100);
+    }, correct ? 1000 : 2500);
   };
 
   const toggleCat = (c) => {
