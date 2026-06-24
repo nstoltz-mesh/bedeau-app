@@ -40,7 +40,7 @@ function genQuestion(vin, pool) {
   } else if (type === "cepage" && vin.cp) {
     question = `Quel est le cépage (ou assemblage) de\n\n${vin.nom} ?`;
     reponse = vin.cp;
-    const distracteurs = pick(pool.filter(v => v.cp && v.cp !== vin.cp).map(v => v.cp), 3);
+    const distracteurs = pick([...new Set(pool.filter(v => v.cp && v.cp !== vin.cp).map(v => v.cp))], 3);
     if (distracteurs.length < 3) return genQuestion(vin, pool);
     options = shuffle([reponse, ...distracteurs]);
   } else {
