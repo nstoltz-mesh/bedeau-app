@@ -54,7 +54,7 @@ function genQuestion(vin, pool) {
   return { vin, question, reponse, options, type };
 }
 
-const s = { background: "#0A040A", color: "#F0E8E0", fontFamily: "system-ui, -apple-system, sans-serif", minHeight: "100vh", maxWidth: 480, margin: "0 auto", padding: 0 };
+const s = { background: "#0A040A", color: "#F0E8E0", fontFamily: "system-ui, -apple-system, sans-serif", minHeight: "100dvh", maxWidth: 480, margin: "0 auto", padding: 0, overflowX: "hidden" };
 
 export default function App() {
   const [screen, setScreen] = useState("home");
@@ -84,6 +84,19 @@ export default function App() {
     } catch { return 0; }
   });
   const touchStartX = useRef(null);
+
+  useEffect(() => {
+    if (document.getElementById('bedeau-css')) return;
+    const style = document.createElement('style');
+    style.id = 'bedeau-css';
+    style.textContent = [
+      '*,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}',
+      'html,body{height:100%;overflow-x:hidden;overscroll-behavior-y:none;-webkit-text-size-adjust:100%}',
+      'button{touch-action:manipulation;font-family:inherit;-webkit-appearance:none}',
+      '#root{min-height:100dvh}',
+    ].join('');
+    document.head.appendChild(style);
+  }, []);
   const [vinStats, setVinStats] = useState(() => {
     try { return JSON.parse(localStorage.getItem("bedeau_stats") || "{}"); }
     catch { return {}; }
@@ -205,17 +218,17 @@ export default function App() {
 
   if (screen === "home") return (
     <div style={s}>
-      <div style={{ padding: "32px 20px 16px", borderBottom: "1px solid #2A1A22", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <div style={{ padding: "max(32px, env(safe-area-inset-top, 24px)) 20px 16px", borderBottom: "1px solid #2A1A22", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
           <div style={{ fontSize: 11, letterSpacing: 3, color: "#8A7060", textTransform: "uppercase", marginBottom: 6 }}>Bedeau · Formation</div>
           <div style={{ fontSize: 28, fontWeight: 700, color: "#F0E8E0", lineHeight: 1.15 }}>Carte des vins</div>
           <div style={{ fontSize: 13, color: "#7A6B60", marginTop: 4 }}>{VINS.length} vins · fiches techniques</div>
         </div>
         {dailyStreak > 0 && (
-          <div style={{ textAlign: "center", background: "#1E1008", border: "1px solid #C9A84C40", borderRadius: 12, padding: "10px 14px", flexShrink: 0 }}>
-            <div style={{ fontSize: 22 }}>🔥</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#C9A84C" }}>{dailyStreak}</div>
-            <div style={{ fontSize: 10, color: "#7A6B60" }}>{dailyStreak > 1 ? "jours" : "jour"}</div>
+          <div style={{ textAlign: "center", background: "#1E1008", border: "1px solid #C9A84C40", borderRadius: 14, padding: "12px 16px", flexShrink: 0, minWidth: 64 }}>
+            <div style={{ fontSize: 24 }}>🔥</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: "#C9A84C", lineHeight: 1 }}>{dailyStreak}</div>
+            <div style={{ fontSize: 11, color: "#7A6B60", marginTop: 2 }}>{dailyStreak > 1 ? "jours" : "jour"}</div>
           </div>
         )}
       </div>
@@ -228,7 +241,7 @@ export default function App() {
             const active = selectedCats.includes(c);
             return (
               <button key={c} onClick={() => toggleCat(c)}
-                style={{ background: active ? cfg.color : "#1E1018", color: active ? "#0A040A" : cfg.color, border: `1px solid ${cfg.color}40`, borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: active ? 700 : 400, cursor: "pointer", transition: "all .15s" }}>
+                style={{ background: active ? cfg.color : "#1E1018", color: active ? "#0A040A" : cfg.color, border: `1px solid ${cfg.color}40`, borderRadius: 20, padding: "9px 16px", fontSize: 13, fontWeight: active ? 700 : 400, cursor: "pointer", transition: "all .15s", minHeight: 44 }}>
                 {cfg.emoji} {cfg.short} <span style={{ opacity: .7 }}>({vinsBycat[c].length})</span>
               </button>
             );
@@ -244,7 +257,7 @@ export default function App() {
         </div>
       </div>
 
-      <div style={{ padding: "16px 20px 32px", display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ padding: "16px 20px", paddingBottom: "max(32px, env(safe-area-inset-bottom, 32px))", display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={{ fontSize: 11, letterSpacing: 2, color: "#8A7060", textTransform: "uppercase", marginBottom: 4 }}>Longueur de session</div>
         <div style={{ display: "flex", gap: 8 }}>
           {[10, 25, 50, null].map(n => {
@@ -253,7 +266,7 @@ export default function App() {
             const disabled = n && n > activeVins.length;
             return (
               <button key={String(n)} onClick={() => !disabled && setSessionLength(n)}
-                style={{ flex: 1, padding: "10px 0", background: active ? "#C9A84C" : "#1E1018", border: `1px solid ${active ? "#C9A84C" : "#2A1A22"}`, borderRadius: 10, color: active ? "#0A040A" : disabled ? "#3A3030" : "#D0C8C0", fontSize: 13, fontWeight: active ? 700 : 400, cursor: disabled ? "default" : "pointer" }}>
+                style={{ flex: 1, padding: "13px 0", background: active ? "#C9A84C" : "#1E1018", border: `1px solid ${active ? "#C9A84C" : "#2A1A22"}`, borderRadius: 10, color: active ? "#0A040A" : disabled ? "#3A3030" : "#D0C8C0", fontSize: 14, fontWeight: active ? 700 : 400, cursor: disabled ? "default" : "pointer", minHeight: 48 }}>
                 {label}
               </button>
             );
@@ -303,20 +316,21 @@ export default function App() {
     const vin = flashVins[flashIdx];
     const cfg = CAT_CONFIG[vin.c] || { color: "#C9A84C", bg: "#1A1208" };
     return (
-      <div style={s}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid #2A1A22" }}>
-          <button onClick={() => setScreen("home")} style={{ background: "none", border: "none", color: "#8A7060", fontSize: 22, cursor: "pointer" }}>←</button>
-          <div style={{ fontSize: 12, color: "#7A6B60" }}>{flashIdx + 1} / {flashVins.length}</div>
-          <div style={{ fontSize: 12, color: cfg.color }}>{CAT_CONFIG[vin.c]?.emoji} {CAT_CONFIG[vin.c]?.short}</div>
+      <div style={{ ...s, display: "flex", flexDirection: "column" }}>
+        {/* En-tête sticky */}
+        <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#0A040A", borderBottom: "1px solid #2A1A22" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px" }}>
+            <button onClick={() => setScreen("home")} style={{ background: "none", border: "none", color: "#8A7060", fontSize: 26, cursor: "pointer", padding: "4px 8px 4px 0", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center" }}>←</button>
+            <div style={{ fontSize: 13, color: "#7A6B60" }}>{flashIdx + 1} / {flashVins.length}</div>
+            <div style={{ fontSize: 13, color: cfg.color, minWidth: 60, textAlign: "right" }}>{CAT_CONFIG[vin.c]?.emoji} {CAT_CONFIG[vin.c]?.short}</div>
+          </div>
+          <div style={{ height: 3, background: "#2A1A22" }}>
+            <div style={{ height: "100%", width: `${((flashIdx + 1) / flashVins.length) * 100}%`, background: cfg.color, transition: "width .3s" }} />
+          </div>
         </div>
 
-        <div style={{ padding: "0 20px" }}>
-          {/* Progress bar */}
-          <div style={{ height: 3, background: "#2A1A22", borderRadius: 2, margin: "12px 0" }}>
-            <div style={{ height: "100%", width: `${((flashIdx + 1) / flashVins.length) * 100}%`, background: cfg.color, borderRadius: 2, transition: "width .3s" }} />
-          </div>
-
-          {/* Card */}
+        {/* Carte — zone swipeable plein écran */}
+        <div style={{ flex: 1, padding: "12px 16px 0", display: "flex", flexDirection: "column" }}>
           <div
             onClick={() => setFlashFlipped(f => !f)}
             onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
@@ -327,40 +341,44 @@ export default function App() {
               else { setFlashFlipped(f => !f); }
               touchStartX.current = null;
             }}
-            style={{ background: "#140A10", border: `1px solid ${cfg.color}30`, borderRadius: 16, minHeight: 340, padding: "24px 20px", cursor: "pointer", marginBottom: 16, position: "relative", userSelect: "none" }}>
+            style={{ flex: 1, background: "#140A10", border: `1px solid ${cfg.color}30`, borderRadius: 20, padding: "24px 20px 56px", cursor: "pointer", marginBottom: 12, position: "relative", userSelect: "none", minHeight: 320 }}>
 
             {!flashFlipped ? (
               <>
-                <div style={{ fontSize: 11, letterSpacing: 2, color: cfg.color, textTransform: "uppercase", marginBottom: 12 }}>Pays · Origine</div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: "#F0E8E0", lineHeight: 1.3, marginBottom: 8 }}>{vin.nom}</div>
-                <div style={{ fontSize: 13, color: "#A09080", marginBottom: 16, lineHeight: 1.5 }}>{vin.n}</div>
-                {vin.ca ? <div style={{ background: "#2A1408", border: "1px solid #8B4513", borderRadius: 8, padding: "8px 12px", fontSize: 12, color: "#D4823A", marginBottom: 8 }}>À carafer avant service</div> : null}
-                {vin.al ? <div style={{ background: "#201018", border: "1px solid #8B2030", borderRadius: 8, padding: "8px 12px", fontSize: 12, color: "#C44858" }}>Attention — voir alertes</div> : null}
-                <div style={{ position: "absolute", bottom: 16, left: 0, right: 0, display: "flex", justifyContent: "space-between", padding: "0 20px", fontSize: 11, color: "#4A3A40" }}>
-                  <span>← swipe</span><span>Toucher pour retourner</span><span>swipe →</span>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: cfg.color, textTransform: "uppercase", marginBottom: 14 }}>
+                  {vin.p} · {CAT_CONFIG[vin.c]?.short}
+                </div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: "#F0E8E0", lineHeight: 1.25, marginBottom: 10 }}>{vin.nom}</div>
+                <div style={{ fontSize: 14, color: "#A09080", marginBottom: 18, lineHeight: 1.6 }}>{vin.n}</div>
+                {vin.ca ? <div style={{ background: "#2A1408", border: "1px solid #8B4513", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#D4823A", marginBottom: 8 }}>📦 À carafer avant service</div> : null}
+                {vin.al ? <div style={{ background: "#201018", border: "1px solid #8B2030", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#C44858" }}>⚠️ Attention — voir alertes</div> : null}
+                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 20px", borderTop: "1px solid #2A1A22", fontSize: 12, color: "#4A3A40" }}>
+                  <span>← swipe</span>
+                  <span style={{ color: cfg.color + "90" }}>Toucher · retourner</span>
+                  <span>swipe →</span>
                 </div>
               </>
             ) : (
               <>
-                <div style={{ fontSize: 11, letterSpacing: 2, color: cfg.color, textTransform: "uppercase", marginBottom: 12 }}>Fiche technique</div>
-                <div style={{ fontSize: 13, color: "#8A7060", marginBottom: 6, fontWeight: 600 }}>CÉPAGES</div>
-                <div style={{ fontSize: 14, color: "#D0C8C0", marginBottom: 14, lineHeight: 1.5 }}>{vin.cp}</div>
-                <div style={{ fontSize: 13, color: "#8A7060", marginBottom: 6, fontWeight: 600 }}>PROFIL</div>
-                <div style={{ fontSize: 14, color: "#D0C8C0", marginBottom: 14, lineHeight: 1.5 }}>{vin.pr}</div>
-                <div style={{ fontSize: 13, color: "#8A7060", marginBottom: 6, fontWeight: 600 }}>À DIRE AU CLIENT</div>
-                <div style={{ fontSize: 14, color: cfg.color, lineHeight: 1.6, fontStyle: "italic" }}>{vin.ps}</div>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: cfg.color, textTransform: "uppercase", marginBottom: 14 }}>Fiche technique</div>
+                <div style={{ fontSize: 12, color: "#8A7060", marginBottom: 4, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Cépages</div>
+                <div style={{ fontSize: 15, color: "#D0C8C0", marginBottom: 16, lineHeight: 1.5 }}>{vin.cp}</div>
+                <div style={{ fontSize: 12, color: "#8A7060", marginBottom: 4, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Profil</div>
+                <div style={{ fontSize: 15, color: "#D0C8C0", marginBottom: 16, lineHeight: 1.5 }}>{vin.pr}</div>
+                <div style={{ fontSize: 12, color: "#8A7060", marginBottom: 6, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>À dire au client</div>
+                <div style={{ fontSize: 15, color: cfg.color, lineHeight: 1.65, fontStyle: "italic" }}>{vin.ps}</div>
               </>
             )}
           </div>
 
           {/* Navigation */}
-          <div style={{ display: "flex", gap: 12 }}>
-            <button onClick={prevFlash} style={{ flex: 1, padding: "14px 0", background: "#1E1018", border: "1px solid #2A1A22", borderRadius: 10, color: "#A09080", fontSize: 18, cursor: "pointer" }}>←</button>
+          <div style={{ display: "flex", gap: 10, paddingBottom: "max(20px, env(safe-area-inset-bottom, 20px))" }}>
+            <button onClick={prevFlash} style={{ flex: 1, padding: "18px 0", background: "#1E1018", border: "1px solid #2A1A22", borderRadius: 14, color: "#A09080", fontSize: 22, cursor: "pointer", minHeight: 56 }}>←</button>
             <button onClick={() => setFlashFlipped(f => !f)}
-              style={{ flex: 2, padding: "14px 0", background: flashFlipped ? cfg.color : "#1E1018", border: `1px solid ${cfg.color}40`, borderRadius: 10, color: flashFlipped ? "#0A040A" : cfg.color, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+              style={{ flex: 2, padding: "18px 0", background: flashFlipped ? cfg.color : "#1E1018", border: `1px solid ${cfg.color}40`, borderRadius: 14, color: flashFlipped ? "#0A040A" : cfg.color, fontSize: 14, fontWeight: 700, cursor: "pointer", minHeight: 56 }}>
               {flashFlipped ? "Voir recto" : "Voir la fiche"}
             </button>
-            <button onClick={nextFlash} style={{ flex: 1, padding: "14px 0", background: "#1E1018", border: "1px solid #2A1A22", borderRadius: 10, color: "#A09080", fontSize: 18, cursor: "pointer" }}>→</button>
+            <button onClick={nextFlash} style={{ flex: 1, padding: "18px 0", background: "#1E1018", border: "1px solid #2A1A22", borderRadius: 14, color: "#A09080", fontSize: 22, cursor: "pointer", minHeight: 56 }}>→</button>
           </div>
         </div>
       </div>
@@ -375,28 +393,32 @@ export default function App() {
     const types = { profil: "Identifie le vin", cepage: "Identifie les cépages", pays: "Identifie le pays" };
 
     return (
-      <div style={s}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid #2A1A22" }}>
-          <button onClick={() => setScreen("home")} style={{ background: "none", border: "none", color: "#8A7060", fontSize: 22, cursor: "pointer" }}>✕</button>
-          <div style={{ display: "flex", gap: 16, fontSize: 13 }}>
-            <span style={{ color: "#4CAF78" }}>✓ {score}</span>
-            {streak >= 2 && <span style={{ color: "#C9A84C" }}>🔥 {streak}</span>}
+      <div style={{ ...s, display: "flex", flexDirection: "column" }}>
+        {/* En-tête sticky */}
+        <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#0A040A", borderBottom: "1px solid #2A1A22" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px" }}>
+            <button onClick={() => setScreen("home")} style={{ background: "none", border: "none", color: "#8A7060", fontSize: 24, cursor: "pointer", padding: "4px 8px 4px 0", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center" }}>✕</button>
+            <div style={{ display: "flex", gap: 16, fontSize: 14 }}>
+              <span style={{ color: "#4CAF78", fontWeight: 600 }}>✓ {score}</span>
+              {streak >= 2 && <span style={{ color: "#C9A84C" }}>🔥 {streak}</span>}
+            </div>
+            <div style={{ fontSize: 13, color: "#7A6B60" }}>{answered + 1} / {total}</div>
           </div>
-          <div style={{ fontSize: 12, color: "#7A6B60" }}>{answered + 1}/{total}</div>
+          <div style={{ height: 4, background: "#2A1A22" }}>
+            <div style={{ height: "100%", width: `${(answered / total) * 100}%`, background: "#4CAF78", transition: "width .4s" }} />
+          </div>
         </div>
 
-        <div style={{ height: 4, background: "#2A1A22" }}>
-          <div style={{ height: "100%", width: `${(answered / total) * 100}%`, background: "#4CAF78", transition: "width .3s" }} />
-        </div>
-
-        <div style={{ padding: "20px 20px 8px" }}>
-          <div style={{ fontSize: 11, letterSpacing: 2, color: weakMode ? "#C44858" : cfg.color, textTransform: "uppercase", marginBottom: 10 }}>
+        {/* Question */}
+        <div style={{ padding: "18px 20px 10px" }}>
+          <div style={{ fontSize: 11, letterSpacing: 2, color: weakMode ? "#C44858" : cfg.color, textTransform: "uppercase", marginBottom: 12 }}>
             {weakMode ? "📍 Points faibles · " : `${cfg.emoji} ${CAT_CONFIG[quizQ.vin.c]?.short} · `}{types[quizQ.type] || "Quiz"}
           </div>
-          <div style={{ fontSize: 16, color: "#F0E8E0", lineHeight: 1.6, minHeight: 90, whiteSpace: "pre-line" }}>{quizQ.question}</div>
+          <div style={{ fontSize: 17, color: "#F0E8E0", lineHeight: 1.65, whiteSpace: "pre-line" }}>{quizQ.question}</div>
         </div>
 
-        <div style={{ padding: "8px 20px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
+        {/* Options */}
+        <div style={{ padding: "8px 20px", paddingBottom: "max(24px, env(safe-area-inset-bottom, 24px))", display: "flex", flexDirection: "column", gap: 10, flex: 1 }}>
           {quizQ.options.map(opt => {
             let bg = "#1E1018";
             let border = "1px solid #2A1A22";
@@ -408,25 +430,25 @@ export default function App() {
             }
             return (
               <button key={opt} onClick={() => handleAnswer(opt)}
-                style={{ background: bg, border, borderRadius: 10, padding: "14px 16px", textAlign: "left", cursor: chosen ? "default" : "pointer", color, fontSize: 14, lineHeight: 1.4, transition: "all .2s" }}>
+                style={{ background: bg, border, borderRadius: 14, padding: "16px 18px", textAlign: "left", cursor: chosen ? "default" : "pointer", color, fontSize: 15, lineHeight: 1.45, transition: "all .2s", minHeight: 54 }}>
                 {opt}
               </button>
             );
           })}
-        </div>
 
-        {chosen && lastCorrect !== null && (
-          <div style={{ padding: "0 20px 20px" }}>
-            <div style={{ background: lastCorrect ? "#0A2010" : "#200A10", border: `1px solid ${lastCorrect ? "#4CAF78" : "#C44858"}`, borderRadius: 10, padding: "12px 16px", fontSize: 13, color: lastCorrect ? "#4CAF78" : "#C44858" }}>
-              {lastCorrect ? (streak >= 3 ? `🔥 ${streak} en série !` : "Bonne réponse !") : `Réponse : ${quizQ.reponse}`}
-            </div>
-            {!lastCorrect && quizQ.vin.ps && (
-              <div style={{ marginTop: 8, fontSize: 12, color: "#8A7060", fontStyle: "italic", lineHeight: 1.5 }}>
-                "{quizQ.vin.ps}"
+          {chosen && lastCorrect !== null && (
+            <div style={{ marginTop: 4 }}>
+              <div style={{ background: lastCorrect ? "#0A2010" : "#200A10", border: `1px solid ${lastCorrect ? "#4CAF78" : "#C44858"}`, borderRadius: 12, padding: "14px 16px", fontSize: 14, color: lastCorrect ? "#4CAF78" : "#C44858", fontWeight: 600 }}>
+                {lastCorrect ? (streak >= 3 ? `🔥 ${streak} en série !` : "✓ Bonne réponse !") : `✗ Réponse : ${quizQ.reponse}`}
               </div>
-            )}
-          </div>
-        )}
+              {!lastCorrect && quizQ.vin.ps && (
+                <div style={{ marginTop: 8, fontSize: 13, color: "#8A7060", fontStyle: "italic", lineHeight: 1.6 }}>
+                  "{quizQ.vin.ps}"
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -437,55 +459,55 @@ export default function App() {
     const pct = Math.round((score / total) * 100);
     const badge = pct >= 90 ? "🏆 Expert" : pct >= 70 ? "🎯 Confirmé" : pct >= 50 ? "📚 Apprenti" : "🌱 Débutant";
     return (
-      <div style={s}>
-        <div style={{ padding: "48px 20px 0", textAlign: "center" }}>
-          <div style={{ fontSize: 52, marginBottom: 12 }}>{pct >= 80 ? "🏆" : pct >= 60 ? "🎯" : "📚"}</div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: "#C9A84C", marginBottom: 4 }}>{score}/{total}</div>
-          <div style={{ fontSize: 14, color: "#8A7060", marginBottom: 4 }}>{pct}% de bonnes réponses</div>
-          <div style={{ fontSize: 16, color: "#F0E8E0", marginBottom: 32 }}>{badge}</div>
+      <div style={{ ...s, overflowY: "auto" }}>
+        <div style={{ padding: "max(48px, env(safe-area-inset-top, 48px)) 20px 0", textAlign: "center" }}>
+          <div style={{ fontSize: 56, marginBottom: 12 }}>{pct >= 80 ? "🏆" : pct >= 60 ? "🎯" : "📚"}</div>
+          <div style={{ fontSize: 34, fontWeight: 700, color: "#C9A84C", marginBottom: 4 }}>{score}/{total}</div>
+          <div style={{ fontSize: 14, color: "#8A7060", marginBottom: 6 }}>{pct}% de bonnes réponses</div>
+          <div style={{ fontSize: 17, color: "#F0E8E0", marginBottom: 28 }}>{badge}</div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 32 }}>
-            <div style={{ background: "#1E1018", borderRadius: 12, padding: "16px 12px" }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: "#4CAF78" }}>{score}</div>
-              <div style={{ fontSize: 12, color: "#7A6B60", marginTop: 2 }}>Bonnes réponses</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 28 }}>
+            <div style={{ background: "#1E1018", borderRadius: 14, padding: "18px 12px" }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: "#4CAF78" }}>{score}</div>
+              <div style={{ fontSize: 12, color: "#7A6B60", marginTop: 4 }}>Bonnes réponses</div>
             </div>
-            <div style={{ background: "#1E1018", borderRadius: 12, padding: "16px 12px" }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: "#C9A84C" }}>{bestStreak}</div>
-              <div style={{ fontSize: 12, color: "#7A6B60", marginTop: 2 }}>Meilleure série</div>
+            <div style={{ background: "#1E1018", borderRadius: 14, padding: "18px 12px" }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: "#C9A84C" }}>{bestStreak}</div>
+              <div style={{ fontSize: 12, color: "#7A6B60", marginTop: 4 }}>Meilleure série</div>
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingBottom: 32 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, paddingBottom: 28 }}>
             <button onClick={() => startMode("quiz")}
-              style={{ padding: "16px", background: "#C9A84C", border: "none", borderRadius: 12, color: "#0A040A", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
+              style={{ padding: "18px", background: "#C9A84C", border: "none", borderRadius: 14, color: "#0A040A", fontSize: 16, fontWeight: 700, cursor: "pointer", minHeight: 56 }}>
               Rejouer
             </button>
             <button onClick={() => startMode("flash")}
-              style={{ padding: "16px", background: "#1E1018", border: "1px solid #2A1A22", borderRadius: 12, color: "#D0C8C0", fontSize: 14, cursor: "pointer" }}>
+              style={{ padding: "16px 18px", background: "#1E1018", border: "1px solid #2A1A22", borderRadius: 14, color: "#D0C8C0", fontSize: 15, cursor: "pointer", minHeight: 52 }}>
               Réviser en fiches flash
             </button>
             <button onClick={() => setScreen("home")}
-              style={{ padding: "16px", background: "none", border: "none", color: "#7A6B60", fontSize: 13, cursor: "pointer" }}>
+              style={{ padding: "14px", background: "none", border: "none", color: "#7A6B60", fontSize: 14, cursor: "pointer", minHeight: 44 }}>
               Changer de catégorie
             </button>
           </div>
 
           {wrongVins.length > 0 && (
-            <div style={{ padding: "0 20px 40px" }}>
-              <div style={{ fontSize: 11, letterSpacing: 2, color: "#C44858", textTransform: "uppercase", marginBottom: 12 }}>
+            <div style={{ paddingBottom: "max(40px, env(safe-area-inset-bottom, 40px))", textAlign: "left" }}>
+              <div style={{ fontSize: 11, letterSpacing: 2, color: "#C44858", textTransform: "uppercase", marginBottom: 14 }}>
                 À revoir · {wrongVins.length} vin{wrongVins.length > 1 ? "s" : ""}
               </div>
               {wrongVins.map(v => {
                 const cfg = CAT_CONFIG[v.c] || { color: "#C9A84C" };
                 return (
-                  <div key={v.id} style={{ background: "#140A10", border: `1px solid ${cfg.color}25`, borderRadius: 12, padding: "14px 16px", marginBottom: 10 }}>
+                  <div key={v.id} style={{ background: "#140A10", border: `1px solid ${cfg.color}25`, borderRadius: 14, padding: "16px", marginBottom: 10 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: "#F0E8E0" }}>{v.nom}</div>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: "#F0E8E0" }}>{v.nom}</div>
                       <div style={{ fontSize: 11, color: cfg.color }}>{cfg.emoji} {CAT_CONFIG[v.c]?.short}</div>
                     </div>
-                    <div style={{ fontSize: 12, color: "#8A7060", marginBottom: 4 }}>{v.cp}</div>
-                    <div style={{ fontSize: 12, color: "#A09080", lineHeight: 1.5 }}>{v.pr}</div>
-                    <div style={{ fontSize: 12, color: cfg.color, fontStyle: "italic", marginTop: 8, lineHeight: 1.5 }}>{v.ps}</div>
+                    <div style={{ fontSize: 13, color: "#8A7060", marginBottom: 4 }}>{v.cp}</div>
+                    <div style={{ fontSize: 13, color: "#A09080", lineHeight: 1.55 }}>{v.pr}</div>
+                    <div style={{ fontSize: 13, color: cfg.color, fontStyle: "italic", marginTop: 8, lineHeight: 1.55 }}>{v.ps}</div>
                   </div>
                 );
               })}
