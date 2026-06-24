@@ -188,21 +188,25 @@ export default function App() {
       setStreak(0);
     }
     if (!correct) setWrongVins(prev => [...prev, quizQ.vin]);
-    setTimeout(() => {
-      const nextDone = [...quizDone, quizQ.vin.id];
-      const remaining = quizPool.filter(v => !nextDone.includes(v.id));
-      if (remaining.length === 0) {
-        setQuizDone(nextDone);
-        updateDailyStreak();
-        setScreen("results");
-      } else {
-        const next = remaining[0];
-        setQuizQ(genQuestion(next, filteredVins));
-        setQuizDone(nextDone);
-        setChosen(null);
-        setLastCorrect(null);
-      }
-    }, correct ? 1000 : 2500);
+    if (correct) {
+      setTimeout(() => advanceQuiz(), 1000);
+    }
+  };
+
+  const advanceQuiz = () => {
+    const nextDone = [...quizDone, quizQ.vin.id];
+    const remaining = quizPool.filter(v => !nextDone.includes(v.id));
+    if (remaining.length === 0) {
+      setQuizDone(nextDone);
+      updateDailyStreak();
+      setScreen("results");
+    } else {
+      const next = remaining[0];
+      setQuizQ(genQuestion(next, filteredVins));
+      setQuizDone(nextDone);
+      setChosen(null);
+      setLastCorrect(null);
+    }
   };
 
   const toggleCat = (c) => {
@@ -445,6 +449,12 @@ export default function App() {
                 <div style={{ marginTop: 8, fontSize: 13, color: "#8A7060", fontStyle: "italic", lineHeight: 1.6 }}>
                   "{quizQ.vin.ps}"
                 </div>
+              )}
+              {!lastCorrect && (
+                <button onClick={advanceQuiz}
+                  style={{ marginTop: 14, width: "100%", padding: "16px", background: "#C9A84C", border: "none", borderRadius: 14, color: "#0A040A", fontSize: 15, fontWeight: 700, cursor: "pointer", minHeight: 52 }}>
+                  Question suivante →
+                </button>
               )}
             </div>
           )}
